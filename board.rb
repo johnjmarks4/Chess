@@ -1,6 +1,7 @@
 class Board
 
   def initialize
+    @turn = "w"
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     set_board
@@ -79,7 +80,16 @@ class Board
     print "    a   b   c   d   e   f   g   h"
   end
 
+  def switch_turn
+    @turn == "w" ? @turn = "b" : @turn = "w"
+  end
+
   def play
-    print_board
+    loop do
+      print_board
+      
+      switch_turn
+      break
+    end
   end
 end
