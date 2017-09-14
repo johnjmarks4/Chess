@@ -23,10 +23,10 @@ class Board
       i += 1
     end
 
+    @board[7][4] = @b_king = King.new(7, 4, "k", "b")
+    @board[0][4] = @w_king = King.new(0, 4, "k", "w")
     @board[7][3] = Queen.new(7, 3, "q", "b")
     @board[0][3] = Queen.new(0, 3, "q", "w")
-    @board[7][4] = King.new(7, 4, "k", "b")
-    @board[0][4] = King.new(0, 4, "k", "w")
     @board[7][2] = Bishop.new(7, 2, "b", "b")
     @board[7][5] = Bishop.new(7, 5, "b", "b")
     @board[0][2] = Bishop.new(0, 2, "b", "w")
@@ -92,7 +92,6 @@ class Board
       move(piece)
       print_board
       switch_turn
-      break
     end
   end
 
@@ -116,12 +115,28 @@ class Board
       coord = find_coord(input)
       @board[piece.r][piece.c] = " "
       @board[coord[0]][coord[1]] = piece
-      piece.r, piece.c = coord[0], coord[1]
+      if in_check?
+        puts "That move would place you in check. Please select another move."
+        @board[coord[0]][coord[1]] = " "
+        @board[piece.r][piece.c] = piece
+        move(piece)
+      else
+        piece.r, piece.c = coord[0], coord[1]
+      end
     elsif input.downcase == "cancel"
       return select_piece
     else
       puts "Your selection was not recognized. Please try again."
       move(piece)
+    end
+  end
+
+  def in_check?
+    @turn == "w" ? king = @w_king : king = @b_king
+    @board.any? do |r|
+      r.any? do |s|
+        s.is_a?(Piece) && s.color != @turn && s.show_moves(self).include?([king.r, king.c])
+      end
     end
   end
 
