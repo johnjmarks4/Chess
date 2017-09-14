@@ -88,6 +88,7 @@ class Board
   def play
     loop do
       print_board
+      #break if checkmate?
       piece = select_piece
       move(piece)
       print_board
@@ -107,17 +108,19 @@ class Board
   end
 
   def move(piece)
+    con = []
     moves = piece.show_moves(self).map { |m| convert_notation(m) }
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
     if moves.include?(input)
       coord = find_coord(input)
+      con << @board[coord[0]][coord[1]]
       @board[piece.r][piece.c] = " "
       @board[coord[0]][coord[1]] = piece
       if in_check?
         puts "That move would place you in check. Please select another move."
-        @board[coord[0]][coord[1]] = " "
+        @board[coord[0]][coord[1]] = con.pop
         @board[piece.r][piece.c] = piece
         move(piece)
       else
@@ -139,6 +142,15 @@ class Board
       end
     end
   end
+=begin
+  def checkmate?
+    @turn == "w" ? king = @w_king : king = @b_king
+    @board[king.r][king.c] = " "
+    king.show_moves(self).each do |m|
+      @board[m[0]][m[1]] = king
+      return false if in_check? == false
+  end
+=end
 
   def obj(coord)
     @board[coord[0]][coord[1]]
