@@ -1,4 +1,5 @@
 class Board
+  attr_accessor :board
 
   def initialize
     @turn = "w"
@@ -88,7 +89,8 @@ class Board
     loop do
       print_board
       piece = select_piece
-      print piece
+      move(piece)
+      print_board
       switch_turn
       break
     end
@@ -98,7 +100,6 @@ class Board
     puts "\nPlayer #{@turn}, please select the piece you would like to move."
     piece = find_coord(gets.chomp!)
     if obj(piece).is_a?(Piece)
-      puts "ran"
       obj(piece)
     else
       puts "Your input was not understood or you do not have a piece on that square."
@@ -106,8 +107,33 @@ class Board
     end
   end
 
+  def move(piece)
+    moves = piece.show_moves(self).map { |m| convert_notation(m) }
+    puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
+    puts "Please select your move, or type 'cancel' to select another piece."
+    input = gets.chomp!
+    if moves.include?(input)
+      coord = find_coord(input)
+      @board[piece.r][piece.c] = " "
+      @board[coord[0]][coord[1]] = piece
+      piece.r, piece.c = coord[0], coord[1]
+    elsif input.downcase == "cancel"
+      return select_piece
+    else
+      puts "Your selection was not recognized. Please try again."
+      move(piece)
+    end
+  end
+
   def obj(coord)
     @board[coord[0]][coord[1]]
+  end
+
+  def convert_notation(coord)
+    alph = ('a'..'h').to_a
+    coord[0] += 1
+    coord[1] = alph[coord[1]]
+    coord.join
   end
 
   def find_coord(input)
