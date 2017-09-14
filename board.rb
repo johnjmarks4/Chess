@@ -87,9 +87,34 @@ class Board
   def play
     loop do
       print_board
-      
+      piece = select_piece
+      print piece
       switch_turn
       break
     end
+  end
+
+  def select_piece
+    puts "\nPlayer #{@turn}, please select the piece you would like to move."
+    piece = find_coord(gets.chomp!)
+    if obj(piece).is_a?(Piece)
+      puts "ran"
+      obj(piece)
+    else
+      puts "Your input was not understood or you do not have a piece on that square."
+      select_piece
+    end
+  end
+
+  def obj(coord)
+    @board[coord[0]][coord[1]]
+  end
+
+  def find_coord(input)
+    alph = ('a'..'h').to_a
+    input = input.split('')
+    input[0] = input[0].to_i - 1
+    input[1] = alph.index(input[1])
+    input
   end
 end
