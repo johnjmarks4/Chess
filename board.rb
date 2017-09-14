@@ -88,7 +88,7 @@ class Board
   def play
     loop do
       print_board
-      #break if checkmate?
+      break if checkmate?
       piece = select_piece
       move(piece)
       print_board
@@ -113,14 +113,19 @@ class Board
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
+    con << piece.r
+    con << piece.c
     if moves.include?(input)
       coord = find_coord(input)
       con << @board[coord[0]][coord[1]]
       @board[piece.r][piece.c] = " "
       @board[coord[0]][coord[1]] = piece
+      piece.r, piece.c = coord[0], coord[1]
       if in_check?
         puts "That move would place you in check. Please select another move."
         @board[coord[0]][coord[1]] = con.pop
+        piece.c = con.pop
+        piece.r = con.pop
         @board[piece.r][piece.c] = piece
         move(piece)
       else
@@ -142,15 +147,58 @@ class Board
       end
     end
   end
-=begin
+
+  # Need to refactor this
   def checkmate?
+    con = []
     @turn == "w" ? king = @w_king : king = @b_king
-    @board[king.r][king.c] = " "
     king.show_moves(self).each do |m|
+      @board[king.r][king.c] = " "
+      con << king.r
+      con << king.c
+      con << @board[m[0]][m[1]]
       @board[m[0]][m[1]] = king
-      return false if in_check? == false
+      king.r, king.c = m[0], m[1]
+      if in_check? == false
+        @board[m[0]][m[1]] = con.pop
+        king.c = con.pop
+        king.r = con.pop
+        @board[king.r][king.c] = king
+        return false
+      end
+      @board[m[0]][m[1]] = con.pop
+      king.c = con.pop
+      king.r = con.pop
+    end
+    @board[king.r][king.c] = king
+    return false if shield_king?
+    puts "\nCheckmate, player #{@turn} has lost"
+    true
   end
-=end
+
+  def shield_king?
+    con = []
+    @turn == "w" ? king = @w_king : king = @b_king
+    @board.each do |r|
+      r.each do |s|
+        if s.is_a?(Piece) && s.color == @turn
+          s.show_moves(self).each do |m|
+            # Implement diagonals later
+            if m[0] == king.r || m[1] == king.c
+              con << @board[m[0]][m[1]]
+              @board[m[0]][m[1]] = s
+              if in_check? == false
+                @board[m[0]][m[1]] = con.pop
+                return true 
+              end
+              @board[m[0]][m[1]] = con.pop
+            end
+          end
+        end
+      end
+    end
+    false
+  end
 
   def obj(coord)
     @board[coord[0]][coord[1]]
