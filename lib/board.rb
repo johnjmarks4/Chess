@@ -1,18 +1,22 @@
 class Board
-  attr_accessor :board, :checker
+  attr_accessor :board, :checkers
 
   def initialize
     @turn = "w"
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     set_board
-    @checker = ""
+    @checkers = []
   end
 
   def play
     loop do
       print_board
-      break if checkmate?
+      print in_check? # for testing
+      @checkers.each { |c| print [c.class, [c.r, c.c]]}
+      #print still_in_check?(@board[0][5], [1, 4])
+      #print @checkers.length
+      #break if checkmate?
       piece = select_piece
       move(piece)
       print_board
@@ -43,7 +47,7 @@ class Board
     @board[7][2] = Bishop.new(7, 2, "b", "b", self)
     @board[7][5] = Bishop.new(7, 5, "b", "b", self)
     @board[0][2] = Bishop.new(0, 2, "b", "w", self)
-    @board[0][5] = Rook.new(0, 5, "r", "w", self)
+    @board[0][5] = Bishop.new(0, 5, "b", "w", self)
     @board[7][1] = Knight.new(7, 1, "h", "b", self)
     @board[7][6] = Knight.new(7, 6, "h", "b", self)
     @board[0][1] = Knight.new(0, 1, "h", "w", self)
@@ -145,23 +149,21 @@ class Board
 
   def in_check?
     @turn == "w" ? king = @w_king : king = @b_king
-    @board.any? do |r|
-      r.any? do |s|
+    @board.each do |r|
+      r.each do |s|
         if s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
-          @checker = s
-          true
+          @checkers << s
+        else
+          if @checkers.include?(s) then @checkers.delete(s) end
         end
       end
     end
-    @checker = ""
-    false
+    @checkers.length > 0 ? true : false
   end
 
-  #what is there are two checkers?
-  #how to get rid of checker status?
   def checkmate?
     in_check?
-    if @checker.is_a?(Piece)
+    if @checkers.any? { |e| e.is_a?(Piece) }
       return false if king_escape?
       return false if shield_king?
       puts "\nCheckmate, player #{@turn} has lost"
@@ -186,20 +188,42 @@ class Board
     false
   end
 
+  #Add special code for knights
+  #Only allow one route to be blocked
+
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
-    route = draw_route(king, @checker)
-    route.reject! { |e| e == [king.r, king.c] }
-    @board.each do |r|
-      r.each do |s|
-        if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
-          s.show_moves.each do |m|
-            return true if route.include?(m)
+    can_block_route = []
+    @checkers.each do |checker|
+      route = draw_route(king, checker)
+      route.reject! { |e| e == [king.r, king.c] }
+      @board.each do |r|
+        r.each do |s|
+          if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
+            s.show_moves.each do |m|
+              can_block_route << still_in_check?(s, m)
+            end
           end
         end
       end
     end
+    # fix
+    #if can_block_route.length == @checkers.length
     false
+  end
+
+  # create stash attribute to make this method redundant
+  def still_in_check?(s, m)
+    con = []
+    #print ["before", s.r, s.c, m, @board[m[0]][m[1]].is_a?(Piece), in_check?]
+    con.push(s.r, s.c, @board[m[0]][m[1]])
+    @board[m[0]][m[1]] = s
+    s.r, s.c = m[0], m[1]
+    #print ["after", s.r, s.c, m, @board[m[0]][m[1]].is_a?(Piece), in_check?]
+    check_status = in_check?
+    s.r, s.c, @board[m[0]][m[1]] = con[0], con[1], con[2]
+    #print ["final", s.r, s.c, m, @board[m[0]][m[1]].is_a?(Piece), in_check?]
+    check_status
   end
 
   def draw_route(coord1, coord2)
