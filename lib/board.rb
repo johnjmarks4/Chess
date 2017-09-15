@@ -6,7 +6,7 @@ class Board
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     set_board
-    @board[5][4] = @checker = Queen.new(5, 4, "q", "b", self) # For testing purposes
+    @checker = ""
   end
 
   def play
@@ -38,7 +38,7 @@ class Board
     @board[7][4] = @b_king = King.new(7, 4, "k", "b", self)
     @board[1][4] = " " # For testing purposes
     @board[0][4] = @w_king = King.new(0, 4, "k", "w", self) # For testing purposes
-    #@board[5][3] = Queen.new(5, 3, "q", "b", self) # For testing purposes
+    @board[5][4] = Queen.new(5, 4, "q", "b", self) # For testing purposes
     @board[0][3] = Rook.new(0, 3, "r", "w", self)
     @board[7][2] = Bishop.new(7, 2, "b", "b", self)
     @board[7][5] = Bishop.new(7, 5, "b", "b", self)
@@ -52,6 +52,7 @@ class Board
     @board[7][7] = Rook.new(7, 7, "r", "b", self)
     @board[0][0] = Rook.new(0, 0, "r", "w", self)
     @board[0][7] = Rook.new(0, 7, "r", "w", self)
+    @board[4][4] = Knight.new(4, 4, "k", "b", self)
   end
 
   def print_board
@@ -142,21 +143,30 @@ class Board
     end
   end
 
-  # Plan for edge case when a piece checks king because another one is moved
   def in_check?
     @turn == "w" ? king = @w_king : king = @b_king
     @board.any? do |r|
       r.any? do |s|
-        s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
+        if s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
+          @checker = s
+          true
+        end
       end
     end
+    @checker = ""
+    false
   end
 
+  #what is there are two checkers?
+  #how to get rid of checker status?
   def checkmate?
-    return false if king_escape?
-    return false if shield_king?
-    puts "\nCheckmate, player #{@turn} has lost"
-    true
+    in_check?
+    if @checker.is_a?(Piece)
+      return false if king_escape?
+      return false if shield_king?
+      puts "\nCheckmate, player #{@turn} has lost"
+      true
+    end
   end
 
   def king_escape?
