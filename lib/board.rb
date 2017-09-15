@@ -50,7 +50,7 @@ class Board
     @board[0][6] = Knight.new(0, 6, "h", "w", self)
     @board[7][0] = Rook.new(7, 0, "r", "b", self)
     @board[7][7] = Rook.new(7, 7, "r", "b", self)
-    #@board[3][5] = Rook.new(3, 5, "r", "w", self) # For testing purposes
+    @board[0][0] = Rook.new(0, 0, "r", "w", self)
     @board[0][7] = Rook.new(0, 7, "r", "w", self)
   end
 
@@ -180,7 +180,6 @@ class Board
 =end
 
   def shield_king?
-    con = []
     @turn == "w" ? king = @w_king : king = @b_king
     route = draw_route(king, @checker)
     route.reject! { |e| e == [king.r, king.c] }
@@ -188,10 +187,6 @@ class Board
       r.each do |s|
         if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
           s.show_moves.each do |m|
-            if route.include?(m)
-            print [s.class, m]
-            print route
-            end
             return true if route.include?(m)
           end
         end
@@ -206,7 +201,6 @@ class Board
     route = []
     # Draws a horizontal line between squares
     if coord1[0] == coord2[0]
-      # Make sure it doesn't take King's position into account, pry just reject in the shield method
       a, z = [coord1[1], coord2[1]].sort.each { |e| e }
       (a..z).each { |c| route << [coord1[0], c] }
     # Draws a vertical line between squares
