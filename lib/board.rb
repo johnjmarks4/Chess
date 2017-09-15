@@ -12,8 +12,7 @@ class Board
   def play
     loop do
       print_board
-      print king_escape?
-      #break if checkmate?
+      break if checkmate?
       piece = select_piece
       move(piece)
       print_board
@@ -40,15 +39,15 @@ class Board
     @board[1][4] = " " # For testing purposes
     @board[0][4] = @w_king = King.new(0, 4, "k", "w", self) # For testing purposes
     #@board[5][3] = Queen.new(5, 3, "q", "b", self) # For testing purposes
-    @board[0][3] = Queen.new(0, 3, "q", "w", self)
+    @board[0][3] = Rook.new(0, 3, "r", "w", self)
     @board[7][2] = Bishop.new(7, 2, "b", "b", self)
     @board[7][5] = Bishop.new(7, 5, "b", "b", self)
     @board[0][2] = Bishop.new(0, 2, "b", "w", self)
-    @board[0][5] = Bishop.new(0, 5, "b", "w", self)
+    @board[0][5] = Rook.new(0, 5, "r", "w", self)
     @board[7][1] = Knight.new(7, 1, "h", "b", self)
     @board[7][6] = Knight.new(7, 6, "h", "b", self)
     @board[0][1] = Knight.new(0, 1, "h", "w", self)
-    @board[0][6] = Knight.new(0, 6, "h", "w", self)
+    #@board[0][6] = Knight.new(0, 6, "h", "w", self)
     @board[7][0] = Rook.new(7, 0, "r", "b", self)
     @board[7][7] = Rook.new(7, 7, "r", "b", self)
     @board[0][0] = Rook.new(0, 0, "r", "w", self)
@@ -148,36 +147,13 @@ class Board
     @turn == "w" ? king = @w_king : king = @b_king
     @board.any? do |r|
       r.any? do |s|
-        #if s.is_a?(Piece) && s.color != @turn then print s.show_moves.each { |m| print [m, king.r, king.c] if m.include?([king.r, king.c])} end
         s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
       end
     end
   end
 
-  # Need to refactor this
   def checkmate?
-    con = []
-    @turn == "w" ? king = @w_king : king = @b_king
     return false if king_escape?
-    king.show_moves.each do |m|
-      @board[king.r][king.c] = " "
-      con << king.r
-      con << king.c
-      con << @board[m[0]][m[1]]
-      @board[m[0]][m[1]] = king
-      king.r, king.c = m[0], m[1]
-      if in_check? == false
-        @board[m[0]][m[1]] = con.pop
-        king.c = con.pop
-        king.r = con.pop
-        @board[king.r][king.c] = king
-        return false
-      end
-      @board[m[0]][m[1]] = con.pop
-      king.c = con.pop
-      king.r = con.pop
-    end
-    @board[king.r][king.c] = king
     return false if shield_king?
     puts "\nCheckmate, player #{@turn} has lost"
     true
