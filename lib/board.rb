@@ -3,15 +3,16 @@ class Board
 
   def initialize
     @turn = "w"
-    @checker = ""
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     set_board
+    @board[5][4] = @checker = Queen.new(5, 4, "q", "b", self) # For testing purposes
   end
 
   def play
     loop do
       print_board
+      print shield_king?
       #break if checkmate?
       piece = select_piece
       move(piece)
@@ -36,8 +37,8 @@ class Board
     end
 
     @board[7][4] = @b_king = King.new(7, 4, "k", "b", self)
-    @board[0][4] = @w_king = King.new(0, 4, "k", "w", self)
-    @board[7][3] = Queen.new(7, 3, "q", "b", self)
+    @board[2][4] = @w_king = King.new(2, 4, "k", "w", self) # For testing purposes
+    #@board[5][3] = Queen.new(5, 3, "q", "b", self) # For testing purposes
     @board[0][3] = Queen.new(0, 3, "q", "w", self)
     @board[7][2] = Bishop.new(7, 2, "b", "b", self)
     @board[7][5] = Bishop.new(7, 5, "b", "b", self)
@@ -49,7 +50,7 @@ class Board
     @board[0][6] = Knight.new(0, 6, "h", "w", self)
     @board[7][0] = Rook.new(7, 0, "r", "b", self)
     @board[7][7] = Rook.new(7, 7, "r", "b", self)
-    @board[0][0] = Rook.new(0, 0, "r", "w", self)
+    #@board[3][5] = Rook.new(3, 5, "r", "w", self) # For testing purposes
     @board[0][7] = Rook.new(0, 7, "r", "w", self)
   end
 
@@ -176,32 +177,28 @@ class Board
     puts "\nCheckmate, player #{@turn} has lost"
     true
   end
+=end
 
   def shield_king?
     con = []
     @turn == "w" ? king = @w_king : king = @b_king
     route = draw_route(king, @checker)
+    route.reject! { |e| e == [king.r, king.c] }
     @board.each do |r|
       r.each do |s|
-        if s.is_a?(Piece) && s.color == @turn
+        if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
           s.show_moves.each do |m|
-            # Implement diagonals later
-            if m[0] == king.r || m[1] == king.c
-              con << @board[m[0]][m[1]]
-              @board[m[0]][m[1]] = s
-              if in_check? == false
-                @board[m[0]][m[1]] = con.pop
-                return true 
-              end
-              @board[m[0]][m[1]] = con.pop
+            if route.include?(m)
+            print [s.class, m]
+            print route
             end
+            return true if route.include?(m)
           end
         end
       end
     end
     false
   end
-=end
 
   def draw_route(coord1, coord2)
     if coord1.is_a?(Piece) then coord1 = [coord1.r, coord1.c] end
@@ -217,7 +214,7 @@ class Board
       a, z = [coord1[0], coord2[0]].sort.each { |e| e }
       (a..z).each { |r| route << [r, coord1[1]] }
     # Draws a diagonal line between squares
-    elsif (coord1[0] + coord1[1]).abs == (coord2[0] + coord2[1]).abs || (coord1[0] - coord1[1]).abs == (coord2[0] - coord2[1]).abs
+    elsif (coord1[0] - coord1[1]).abs == (coord2[0] - coord2[1]).abs
       x = -1
       y = -1
       a, z = [coord1[0], coord2[0]].sort.each { |e| e }

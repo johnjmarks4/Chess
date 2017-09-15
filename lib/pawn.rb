@@ -6,13 +6,14 @@ class Pawn < Piece
     moves = []
 
     if on_board?([@r + 1, @c])
-      moves << [@r + 1, @c] if @color == "w"
-      moves << [@r - 1, @c] if @color == "b"
+      moves << [@r + 1, @c] if @color == "w" && !@board.board[@r+1][@c].is_a?(Piece)
+    elsif on_board?([@r - 1, @c])
+      moves << [@r - 1, @c] if @color == "b" && !@board.board[@r-1][@c].is_a?(Piece)
     end
 
     if starting_position?
-      moves << [@r + 2, @c] if @color == "w"
-      moves << [@r - 2, @c] if @color == "b"
+      moves << [@r + 2, @c] if @color == "w" && !occupied?([@r + 1, @c])
+      moves << [@r - 2, @c] if @color == "b" && !occupied?([@r - 1, @c])
     end
 
     diagonals = [[@r + 1, @c + 1], [@r + 1, @c - 1]] if @color == "w"
