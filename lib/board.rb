@@ -12,7 +12,7 @@ class Board
   def play
     loop do
       print_board
-      print shield_king?
+      print king_escape?
       #break if checkmate?
       piece = select_piece
       move(piece)
@@ -37,7 +37,8 @@ class Board
     end
 
     @board[7][4] = @b_king = King.new(7, 4, "k", "b", self)
-    @board[2][4] = @w_king = King.new(2, 4, "k", "w", self) # For testing purposes
+    @board[1][4] = " " # For testing purposes
+    @board[0][4] = @w_king = King.new(0, 4, "k", "w", self) # For testing purposes
     #@board[5][3] = Queen.new(5, 3, "q", "b", self) # For testing purposes
     @board[0][3] = Queen.new(0, 3, "q", "w", self)
     @board[7][2] = Bishop.new(7, 2, "b", "b", self)
@@ -104,6 +105,7 @@ class Board
     if obj(piece).is_a?(Piece)
       obj(piece)
     else
+      # This does not always run when bad input is received
       puts "Your input was not understood or you do not have a piece on that square."
       select_piece
     end
@@ -141,19 +143,22 @@ class Board
     end
   end
 
+  # Plan for edge case when a piece checks king because another one is moved
   def in_check?
     @turn == "w" ? king = @w_king : king = @b_king
     @board.any? do |r|
       r.any? do |s|
+        #if s.is_a?(Piece) && s.color != @turn then print s.show_moves.each { |m| print [m, king.r, king.c] if m.include?([king.r, king.c])} end
         s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
       end
     end
   end
-=begin
+
   # Need to refactor this
   def checkmate?
     con = []
     @turn == "w" ? king = @w_king : king = @b_king
+    return false if king_escape?
     king.show_moves.each do |m|
       @board[king.r][king.c] = " "
       con << king.r
@@ -177,7 +182,23 @@ class Board
     puts "\nCheckmate, player #{@turn} has lost"
     true
   end
-=end
+
+  def king_escape?
+    @turn == "w" ? king = @w_king : king = @b_king
+    x, y = king.r, king.c
+    @board[king.r][king.c] = " "
+    king.show_moves.each do |r, c|
+      king.r, king.c = r, c
+      if in_check? == false
+        king.r, king.c = x, y
+        @board[king.r][king.c] = king
+        return true
+      end
+    end
+    king.r, king.c = x, y
+    @board[king.r][king.c] = king
+    false
+  end
 
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
