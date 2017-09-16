@@ -6,6 +6,7 @@ class Queen < Piece
   include RookMoves
 
   def show_moves
+    @container = []
     asc_right
     asc_left
     desc_right

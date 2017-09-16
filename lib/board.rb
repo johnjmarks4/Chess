@@ -1,3 +1,5 @@
+require 'yaml'
+
 class Board
   attr_accessor :board, :checkers
 
@@ -7,16 +9,13 @@ class Board
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     set_board
     @checkers = []
+    @stash = []
   end
 
   def play
     loop do
       print_board
-      print in_check? # for testing
-      @checkers.each { |c| print [c.class, [c.r, c.c]]}
-      #print still_in_check?(@board[0][5], [1, 4])
-      #print @checkers.length
-      #break if checkmate?
+      break if checkmate?
       piece = select_piece
       move(piece)
       print_board
@@ -40,10 +39,9 @@ class Board
     end
 
     @board[7][4] = @b_king = King.new(7, 4, "k", "b", self)
-    @board[1][4] = " " # For testing purposes
-    @board[0][4] = @w_king = King.new(0, 4, "k", "w", self) # For testing purposes
-    @board[5][4] = Queen.new(5, 4, "q", "b", self) # For testing purposes
-    @board[0][3] = Rook.new(0, 3, "r", "w", self)
+    @board[0][4] = @w_king = King.new(0, 4, "k", "w", self)
+    @board[7][3] = Queen.new(7, 3, "q", "b", self)
+    @board[0][3] = Queen.new(0, 3, "q", "w", self)
     @board[7][2] = Bishop.new(7, 2, "b", "b", self)
     @board[7][5] = Bishop.new(7, 5, "b", "b", self)
     @board[0][2] = Bishop.new(0, 2, "b", "w", self)
@@ -51,12 +49,11 @@ class Board
     @board[7][1] = Knight.new(7, 1, "h", "b", self)
     @board[7][6] = Knight.new(7, 6, "h", "b", self)
     @board[0][1] = Knight.new(0, 1, "h", "w", self)
-    #@board[0][6] = Knight.new(0, 6, "h", "w", self)
+    @board[0][6] = Knight.new(0, 6, "h", "w", self)
     @board[7][0] = Rook.new(7, 0, "r", "b", self)
     @board[7][7] = Rook.new(7, 7, "r", "b", self)
     @board[0][0] = Rook.new(0, 0, "r", "w", self)
     @board[0][7] = Rook.new(0, 7, "r", "w", self)
-    @board[4][4] = Knight.new(4, 4, "k", "b", self)
   end
 
   def print_board
@@ -101,6 +98,13 @@ class Board
 
   def switch_turn
     @turn == "w" ? @turn = "b" : @turn = "w"
+  end
+
+  def save
+    saved_game = YAML::dump(self)
+    f = File.new("save.yaml", "w")
+    f.puts saved_game
+    f.close
   end
 
   def select_piece
@@ -153,6 +157,7 @@ class Board
       r.each do |s|
         if s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
           @checkers << s
+          @checkers.uniq!
         else
           if @checkers.include?(s) then @checkers.delete(s) end
         end
@@ -164,6 +169,8 @@ class Board
   def checkmate?
     in_check?
     if @checkers.any? { |e| e.is_a?(Piece) }
+      print king_escape?
+      print shield_king?
       return false if king_escape?
       return false if shield_king?
       puts "\nCheckmate, player #{@turn} has lost"
@@ -173,24 +180,21 @@ class Board
 
   def king_escape?
     @turn == "w" ? king = @w_king : king = @b_king
-    x, y = king.r, king.c
-    @board[king.r][king.c] = " "
-    king.show_moves.each do |r, c|
-      king.r, king.c = r, c
+    king.show_moves.each do |m|
+      temp_move(king, m)
       if in_check? == false
-        king.r, king.c = x, y
+        undo_temp_move
         @board[king.r][king.c] = king
         return true
+      else
+        undo_temp_move
       end
     end
-    king.r, king.c = x, y
-    @board[king.r][king.c] = king
     false
   end
 
   #Add special code for knights
   #Only allow one route to be blocked
-
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
     can_block_route = []
@@ -201,29 +205,31 @@ class Board
         r.each do |s|
           if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
             s.show_moves.each do |m|
-              can_block_route << still_in_check?(s, m)
+              if route.include?(m)
+                temp_move(s, m)
+                still_in_check = in_check?
+                undo_temp_move
+                return true if still_in_check == false
+              end
             end
           end
         end
       end
     end
-    # fix
-    #if can_block_route.length == @checkers.length
     false
   end
 
-  # create stash attribute to make this method redundant
-  def still_in_check?(s, m)
-    con = []
-    #print ["before", s.r, s.c, m, @board[m[0]][m[1]].is_a?(Piece), in_check?]
-    con.push(s.r, s.c, @board[m[0]][m[1]])
-    @board[m[0]][m[1]] = s
-    s.r, s.c = m[0], m[1]
-    #print ["after", s.r, s.c, m, @board[m[0]][m[1]].is_a?(Piece), in_check?]
-    check_status = in_check?
-    s.r, s.c, @board[m[0]][m[1]] = con[0], con[1], con[2]
-    #print ["final", s.r, s.c, m, @board[m[0]][m[1]].is_a?(Piece), in_check?]
-    check_status
+  def temp_move(piece, move)
+    @stash.push(piece, piece.r, piece.c, move, @board[move[0]][move[1]])
+    @board[piece.r][piece.c] = " "
+    piece.r, piece.c = move[0], move[1]
+    @board[move[0]][move[1]] = piece
+  end
+
+  def undo_temp_move
+    @board[@stash[3][0]][@stash[3][1]] = @stash[4]
+    @stash[0].r, @stash[0].c = @stash[1], @stash[2]
+    @stash = []
   end
 
   def draw_route(coord1, coord2)
