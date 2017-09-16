@@ -109,12 +109,11 @@ class Board
   def select_piece
     puts "\nPlayer #{@turn}, please select the piece you would like to move."
     piece = find_coord(gets.chomp!)
-    if obj(piece).is_a?(Piece)
+    if obj(piece).is_a?(Piece) && obj(piece).color == @turn
       obj(piece)
     else
-      # This does not always run when bad input is received
       puts "Your input was not understood or you do not have a piece on that square."
-      select_piece
+      return select_piece
     end
   end
 
@@ -124,7 +123,8 @@ class Board
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
     if input.downcase == "cancel"
-      return select_piece
+      peice = select_piece
+      return move(piece)
     elsif moves.include?(input) == false
       puts "Your selection was not recognized. Please try again."
       return move(piece)
@@ -183,8 +183,6 @@ class Board
     false
   end
 
-  #Add special code for knights
-  #Only allow one route to be blocked
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
     can_block_route = []
