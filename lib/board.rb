@@ -18,7 +18,6 @@ class Board
       break if checkmate?
       piece = select_piece
       move(piece)
-      print_board
       switch_turn
     end
   end
@@ -120,34 +119,27 @@ class Board
   end
 
   def move(piece)
-    con = []
     moves = piece.show_moves.map { |m| convert_notation(m) }
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
-    con << piece.r
-    con << piece.c
-    if moves.include?(input)
-      coord = find_coord(input)
-      con << @board[coord[0]][coord[1]]
-      @board[piece.r][piece.c] = " "
-      @board[coord[0]][coord[1]] = piece
-      piece.r, piece.c = coord[0], coord[1]
+    if input.downcase == "cancel"
+      return select_piece
+    elsif moves.include?(input) == false
+      puts "Your selection was not recognized. Please try again."
+      return move(piece)
+    else
+      move = find_coord(input)
+      temp_move(piece, move)
       if in_check?
         puts "That move would place you in check. Please select another move."
-        @board[coord[0]][coord[1]] = con.pop
-        piece.c = con.pop
-        piece.r = con.pop
-        @board[piece.r][piece.c] = piece
-        move(piece)
+        undo_temp_move
+        return move(piece)
       else
-        piece.r, piece.c = coord[0], coord[1]
+        undo_temp_move
+        @board[move[0]][move[1]] = piece
+        piece.r, piece.c = move[0], move[1]
       end
-    elsif input.downcase == "cancel"
-      return select_piece
-    else
-      puts "Your selection was not recognized. Please try again."
-      move(piece)
     end
   end
 
@@ -169,8 +161,6 @@ class Board
   def checkmate?
     in_check?
     if @checkers.any? { |e| e.is_a?(Piece) }
-      print king_escape?
-      print shield_king?
       return false if king_escape?
       return false if shield_king?
       puts "\nCheckmate, player #{@turn} has lost"
