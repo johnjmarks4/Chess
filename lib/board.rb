@@ -13,6 +13,7 @@ class Board
   end
 
   def play
+    print "\nType 'save' at any time to save your game."
     loop do
       print_board
       break if checkmate?
@@ -104,25 +105,37 @@ class Board
     f = File.new("save.yaml", "w")
     f.puts saved_game
     f.close
+    puts "\nYour game has been successfully saved\n"
   end
 
   def select_piece
     puts "\nPlayer #{@turn}, please select the piece you would like to move."
-    piece = find_coord(gets.chomp!)
-    if obj(piece).is_a?(Piece) && obj(piece).color == @turn
-      obj(piece)
+    input = gets.chomp!
+    piece = find_coord(input)
+    if piece.length == 2 && !piece.include?(nil)
+      if obj(piece).is_a?(Piece) && obj(piece).color == @turn
+        obj(piece) 
+      end
+    elsif input.downcase == "save"
+      save
+      return select_piece
     else
-      puts "Your input was not understood or you do not have a piece on that square."
+      print "\nYour input was not understood, or you do not have a piece with open moves at that square. \n
+      Please select a piece in the following format: 2a."
       return select_piece
     end
   end
 
+  # Type in 7d and it only lets you move the pawn forward two. Why?
   def move(piece)
     moves = piece.show_moves.map { |m| convert_notation(m) }
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
-    if input.downcase == "cancel"
+    if input.downcase == "save"
+      save
+      return move(piece)
+    elsif input.downcase == "cancel"
       peice = select_piece
       return move(piece)
     elsif moves.include?(input) == false

@@ -7,6 +7,7 @@ require_relative "queen"
 require_relative "king"
 
 puts "Player please select new game or load game"
+
 board = ""
 while board == ""
   choice = gets.chomp

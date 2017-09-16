@@ -1,0 +1,317 @@
+--- &1 !ruby/object:Board
+turn: w
+board:
+- - !ruby/object:Rook
+    r: 0
+    c: 0
+    type: r
+    color: w
+    container:
+    - - 1
+      - 0
+    - - 2
+      - 0
+    - - 1
+      - 0
+    - - 2
+      - 0
+    board: *1
+    unicode: "♜"
+  - !ruby/object:Knight
+    r: 0
+    c: 1
+    type: h
+    color: w
+    container: []
+    board: *1
+    unicode: "♞"
+  - !ruby/object:Bishop
+    r: 0
+    c: 2
+    type: b
+    color: w
+    container: []
+    board: *1
+    unicode: "♝"
+  - !ruby/object:Queen
+    r: 0
+    c: 3
+    type: q
+    color: w
+    container: []
+    board: *1
+    unicode: "♛"
+  - &3 !ruby/object:King
+    r: 0
+    c: 4
+    type: k
+    color: w
+    container: []
+    board: *1
+    unicode: "♚"
+  - !ruby/object:Bishop
+    r: 0
+    c: 5
+    type: b
+    color: w
+    container: []
+    board: *1
+    unicode: "♝"
+  - !ruby/object:Knight
+    r: 0
+    c: 6
+    type: h
+    color: w
+    container: []
+    board: *1
+    unicode: "♞"
+  - !ruby/object:Rook
+    r: 0
+    c: 7
+    type: r
+    color: w
+    container: []
+    board: *1
+    unicode: "♜"
+- - " "
+  - !ruby/object:Pawn
+    r: 1
+    c: 1
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - !ruby/object:Pawn
+    r: 1
+    c: 2
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - !ruby/object:Pawn
+    r: 1
+    c: 3
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - !ruby/object:Pawn
+    r: 1
+    c: 4
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - !ruby/object:Pawn
+    r: 1
+    c: 5
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - !ruby/object:Pawn
+    r: 1
+    c: 6
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - !ruby/object:Pawn
+    r: 1
+    c: 7
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+- - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+- - !ruby/object:Pawn
+    r: 3
+    c: 0
+    type: p
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+- - " "
+  - " "
+  - " "
+  - !ruby/object:Pawn
+    r: 4
+    c: 3
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - " "
+  - " "
+  - " "
+  - " "
+- - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+  - " "
+- - !ruby/object:Pawn
+    r: 6
+    c: 0
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - !ruby/object:Pawn
+    r: 6
+    c: 1
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - !ruby/object:Pawn
+    r: 6
+    c: 2
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - " "
+  - !ruby/object:Pawn
+    r: 6
+    c: 4
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - !ruby/object:Pawn
+    r: 6
+    c: 5
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - !ruby/object:Pawn
+    r: 6
+    c: 6
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+  - !ruby/object:Pawn
+    r: 6
+    c: 7
+    type: p
+    color: b
+    container: []
+    board: *1
+    unicode: "♙"
+- - !ruby/object:Rook
+    r: 7
+    c: 0
+    type: r
+    color: b
+    container: []
+    board: *1
+    unicode: "♖"
+  - !ruby/object:Knight
+    r: 7
+    c: 1
+    type: h
+    color: b
+    container: []
+    board: *1
+    unicode: "♘"
+  - !ruby/object:Bishop
+    r: 7
+    c: 2
+    type: b
+    color: b
+    container:
+    - - 6
+      - 3
+    - - 5
+      - 4
+    - - 4
+      - 5
+    - - 3
+      - 6
+    - - 2
+      - 7
+    board: *1
+    unicode: "♗"
+  - !ruby/object:Queen
+    r: 7
+    c: 3
+    type: q
+    color: b
+    container:
+    - - 6
+      - 3
+    - - 5
+      - 3
+    board: *1
+    unicode: "♕"
+  - &2 !ruby/object:King
+    r: 7
+    c: 4
+    type: k
+    color: b
+    container: []
+    board: *1
+    unicode: "♔"
+  - !ruby/object:Bishop
+    r: 7
+    c: 5
+    type: b
+    color: b
+    container: []
+    board: *1
+    unicode: "♗"
+  - !ruby/object:Knight
+    r: 7
+    c: 6
+    type: h
+    color: b
+    container: []
+    board: *1
+    unicode: "♘"
+  - !ruby/object:Rook
+    r: 7
+    c: 7
+    type: r
+    color: b
+    container: []
+    board: *1
+    unicode: "♖"
+b_king: *2
+w_king: *3
+checkers: []
+stash: []
