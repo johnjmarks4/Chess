@@ -120,8 +120,8 @@ class Board
       save
       return select_piece
     else
-      print "\nYour input was not understood, or you do not have a piece with open moves at that square. \n
-      Please select a piece in the following format: 2a."
+      puts "\nYour input was not understood, or you do not have a piece with open moves at that square."
+      puts "Please select a piece in the following format: 2a."
       return select_piece
     end
   end
