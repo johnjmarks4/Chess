@@ -136,7 +136,7 @@ class Board
       save
       return move(piece)
     elsif input.downcase == "cancel"
-      peice = select_piece
+      piece = select_piece
       return move(piece)
     elsif moves.include?(input) == false
       puts "Your selection was not recognized. Please try again."
@@ -221,6 +221,7 @@ class Board
   end
 
   def temp_move(piece, move)
+    @stash = []
     @stash.push(piece, piece.r, piece.c, move, @board[move[0]][move[1]])
     @board[piece.r][piece.c] = " "
     piece.r, piece.c = move[0], move[1]
