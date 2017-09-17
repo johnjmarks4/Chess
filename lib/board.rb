@@ -126,7 +126,6 @@ class Board
     end
   end
 
-  # Type in 7d and it only lets you move the pawn forward two. Why?
   def move(piece)
     moves = piece.show_moves.map { |m| convert_notation(m) }
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
