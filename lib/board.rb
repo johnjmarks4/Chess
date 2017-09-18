@@ -132,37 +132,50 @@ class Board
   end
 
   def move(piece)
+    user_input = choose_move(piece)
+    move = check_legal(piece, user_input)
+    @board[move[0]][move[1]] = piece
+    piece.r, piece.c = move[0], move[1]
+    promote_pawn(piece)
+  end
+
+  def promote_pawn(piece)
+    if piece.is_a?(Pawn) && piece.r == 7 || piece.r == 0
+      @board[piece.r][piece.c] = piece.promote
+    end
+  end
+
+  def check_legal(piece, user_input)
+    move = find_coord(user_input)
+    remove_if_checker(move)
+    temp_move(piece, move)
+    if in_check?
+      puts "That move would place you in check. Please select another move."
+      undo_temp_move
+      @checkers << @board[move[0]][move[1]]
+      check_legal(piece, user_input)
+    else
+      undo_temp_move
+      move
+    end
+  end
+
+  def choose_move(piece)
     moves = piece.show_moves.map { |m| convert_notation(m) }
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
     if input.downcase == "save"
       save
-      return move(piece)
+      return choose_move(piece)
     elsif input.downcase == "cancel"
       piece = select_piece
-      return move(piece)
+      return choose_move(piece)
     elsif moves.include?(input) == false
       puts "Your selection was not recognized. Please try again."
-      return move(piece)
+      return choose_move(piece)
     else
-      move = find_coord(input)
-      remove_if_checker(move)
-      temp_move(piece, move)
-      if in_check?
-        puts "That move would place you in check. Please select another move."
-        undo_temp_move
-        @checkers << @board[move[0]][move[1]]
-        return move(piece)
-      else
-        undo_temp_move
-        @board[move[0]][move[1]] = piece
-        piece.r, piece.c = move[0], move[1]
-
-        if piece.is_a?(Pawn) && piece.r == 7 || piece.r == 0
-          @board[piece.r][piece.c] = piece.promote
-        end
-      end
+      input
     end
   end
 
