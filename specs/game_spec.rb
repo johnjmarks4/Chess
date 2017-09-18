@@ -18,7 +18,9 @@ describe Board do
       board.board[2][5] = Pawn.new(2, 5, "w", board)
       board.board[3][6] = Pawn.new(3, 6, "w", board)
       board.board[3][7] = Queen.new(3, 7, "b", board)
-      king = board.board[0][5]
+      king = board.board[0][4]
+      board.instance_variable_set("@turn", "w")
+      board.instance_variable_set("@w_king", king)
 
       expect(board.checkmate?).to eql(true)
     end
@@ -35,7 +37,6 @@ describe Board do
 
       board.instance_variable_set("@turn", "b")
       board.instance_variable_set("@b_king", king)
-      board.print_board
 
       expect(board.checkmate?).to eql(true)
     end
@@ -48,7 +49,6 @@ describe Board do
       board.board[4][7] = king
       board.instance_variable_set("@b_king", king)
       board.board[4][0] = Rook.new(4, 0, "w", board)
-      board.print_board
 
       expect(board.in_check?).to eql(true)
     end
@@ -66,12 +66,20 @@ describe Board do
       board.board[6][5] = Bishop.new(6, 5, "w", board)
       board.board[6][7] = Bishop.new(6, 7, "b", board)
 
-      board.print_board
-
       board.instance_variable_set("@b_king", king)
       board.instance_variable_set("@w_king", white_king)
       board.instance_variable_set("@white_knight1", white_knight)
 
+      expect(board.checkmate?).to eql(false)
+    end
+
+    it "recognizes if king can take checker" do
+      board = Board.new
+      board.board[6][3] = Pawn.new(6, 3, "w", board)
+      board.instance_variable_set("@turn", "b")
+      board.print_board
+
+      expect(board.in_check?).to eql(true)
       expect(board.checkmate?).to eql(false)
     end
   end

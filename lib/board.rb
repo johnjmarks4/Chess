@@ -7,8 +7,8 @@ class Board
     @turn = "w"
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
-    set_board
     @checkers = []
+    set_board
     @stash = []
   end
 
@@ -147,10 +147,12 @@ class Board
       return move(piece)
     else
       move = find_coord(input)
+      remove_if_checker(move)
       temp_move(piece, move)
       if in_check?
         puts "That move would place you in check. Please select another move."
         undo_temp_move
+        @checkers << @board[move[0]][move[1]]
         return move(piece)
       else
         undo_temp_move
@@ -160,6 +162,14 @@ class Board
         if piece.is_a?(Pawn) && piece.r == 7 || piece.r == 0
           @board[piece.r][piece.c] = piece.promote
         end
+      end
+    end
+  end
+
+  def remove_if_checker(coord)
+    if @board[coord[0]][coord[1]].is_a?(Piece)
+      if @checkers.any? { |c| [c.r, c.c] == coord }
+        @checkers.delete(@board[coord[0]][coord[1]])
       end
     end
   end
@@ -176,6 +186,7 @@ class Board
         end
       end
     end
+
     @checkers.length > 0 ? true : false
   end
 
@@ -185,13 +196,15 @@ class Board
       return false if king_escape?
       return false if shield_king?
       puts "\nCheckmate, player #{@turn} has lost"
-      true
+      return true
     end
+    false
   end
 
   def king_escape?
     @turn == "w" ? king = @w_king : king = @b_king
     king.show_moves.each do |m|
+      remove_if_checker(m)
       temp_move(king, m)
       if in_check? == false
         undo_temp_move
