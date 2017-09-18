@@ -5,6 +5,7 @@ class Rook < Piece
   include RookMoves
 
   def show_moves
+    @container = []
     right
     left
     up

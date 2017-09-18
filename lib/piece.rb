@@ -1,10 +1,9 @@
 class Piece
   attr_accessor :r, :c, :type, :color, :unicode
 
-  def initialize(row, column, type, color, board)
+  def initialize(row, column, color, board)
     @r = row
     @c = column
-    @type = type #redundant?
     @color = color
     @container = []
     @board = board

@@ -5,10 +5,10 @@ class Pawn < Piece
   def show_moves
     moves = []
 
-    if on_board?([@r + 1, @c])
-      moves << [@r + 1, @c] if @color == "w" && !@board.board[@r+1][@c].is_a?(Piece)
-    elsif on_board?([@r - 1, @c])
-      moves << [@r - 1, @c] if @color == "b" && !@board.board[@r-1][@c].is_a?(Piece)
+    if on_board?([@r + 1, @c]) && @color == "w"
+      moves << [@r + 1, @c] if !@board.board[@r+1][@c].is_a?(Piece)
+    elsif on_board?([@r - 1, @c]) && @color == "b" 
+      moves << [@r - 1, @c] if !@board.board[@r-1][@c].is_a?(Piece)
     end
 
     if starting_position?
@@ -29,25 +29,16 @@ class Pawn < Piece
   end
 
   def promote
-    if @r == 7 || @r == 0
-      print "One of your pawns has reached the back row. Type the letter for the piece \n
-      you would like to trade it for: \nq = Queen\nb = Bishop\nk = Knight\nr = Rook\n"
+    puts "One of your pawns has reached the back row. Type the piece you would like to trade it for: "
+    puts "Queen, Bishop, Knight, or Rook."
 
-      input = gets.chomp
+    input = gets.chomp!
 
-      case input
-      when "q"
-        @board.board[@r][@c] = Queen.new(@r, @c, "q", @color, @board)
-      when "b"
-        @board.board[@r][@c] = Bishop.new(@r, @c, "b", @color, @board)
-      when "k"
-        @board.board[@r][@c] = Knight.new(@r, @c, "h", @color, @board)
-      when "r"
-        @board.board[@r][@c] = Rook.new(@r, @c, "r", @color, @board)
-      else
-        puts "Your input was not understood."
-        promote(@board)
-      end
+    if ["Queen", "Bishop", "Knight", "Rook"].include?(input.capitalize)
+      Piece.const_get(input.capitalize).new(@r, @c, @color, @board)
+    else
+      puts "Your input was not understood."
+      promote
     end
   end
 

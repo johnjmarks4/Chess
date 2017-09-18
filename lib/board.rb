@@ -26,34 +26,34 @@ class Board
   def set_board
     i = 0
     8.times do
-      pawn = Pawn.new(1, i, "p", "w", self)
+      pawn = Pawn.new(1, i, "w", self)
       @board[1][i] = pawn
       i += 1
     end
 
     i = 0
     8.times do
-      pawn = Pawn.new(6, i, "p", "b", self)
+      pawn = Pawn.new(6, i, "b", self)
       @board[6][i] = pawn
       i += 1
     end
 
-    @board[7][4] = @b_king = King.new(7, 4, "k", "b", self)
-    @board[0][4] = @w_king = King.new(0, 4, "k", "w", self)
-    @board[7][3] = Queen.new(7, 3, "q", "b", self)
-    @board[0][3] = Queen.new(0, 3, "q", "w", self)
-    @board[7][2] = Bishop.new(7, 2, "b", "b", self)
-    @board[7][5] = Bishop.new(7, 5, "b", "b", self)
-    @board[0][2] = Bishop.new(0, 2, "b", "w", self)
-    @board[0][5] = Bishop.new(0, 5, "b", "w", self)
-    @board[7][1] = Knight.new(7, 1, "h", "b", self)
-    @board[7][6] = Knight.new(7, 6, "h", "b", self)
-    @board[0][1] = Knight.new(0, 1, "h", "w", self)
-    @board[0][6] = Knight.new(0, 6, "h", "w", self)
-    @board[7][0] = Rook.new(7, 0, "r", "b", self)
-    @board[7][7] = Rook.new(7, 7, "r", "b", self)
-    @board[0][0] = Rook.new(0, 0, "r", "w", self)
-    @board[0][7] = Rook.new(0, 7, "r", "w", self)
+    @board[7][4] = @b_king = King.new(7, 4, "b", self)
+    @board[0][4] = @w_king = King.new(0, 4, "w", self)
+    @board[7][3] = Queen.new(7, 3, "b", self)
+    @board[0][3] = Queen.new(0, 3, "w", self)
+    @board[7][2] = Bishop.new(7, 2, "b", self)
+    @board[7][5] = Bishop.new(7, 5, "b", self)
+    @board[0][2] = Bishop.new(0, 2, "w", self)
+    @board[0][5] = Bishop.new(0, 5, "w", self)
+    @board[7][1] = Knight.new(7, 1, "b", self)
+    @board[7][6] = Knight.new(7, 6, "b", self)
+    @board[0][1] = Knight.new(0, 1, "w", self)
+    @board[0][6] = Knight.new(0, 6, "w", self)
+    @board[7][0] = Rook.new(7, 0, "b", self)
+    @board[7][7] = Rook.new(7, 7, "b", self)
+    @board[0][0] = Rook.new(0, 0, "w", self)
+    @board[0][7] = Rook.new(0, 7, "w", self)
   end
 
   def print_board
@@ -113,16 +113,21 @@ class Board
     input = gets.chomp!
     piece = find_coord(input)
     if piece.length == 2 && !piece.include?(nil)
-      if obj(piece).is_a?(Piece) && obj(piece).color == @turn
-        obj(piece) 
+      if obj(piece).is_a?(Piece)
+        if obj(piece).color == @turn
+          obj(piece)
+        else
+          puts "\nPlayer #{@turn}, that piece does not belong to you."
+          select_piece
+        end
       end
     elsif input.downcase == "save"
       save
-      return select_piece
+      select_piece
     else
       puts "\nYour input was not understood, or you do not have a piece with open moves at that square."
       puts "Please select a piece in the following format: 2a."
-      return select_piece
+      select_piece
     end
   end
 
@@ -151,6 +156,10 @@ class Board
         undo_temp_move
         @board[move[0]][move[1]] = piece
         piece.r, piece.c = move[0], move[1]
+
+        if piece.is_a?(Pawn) && piece.r == 7 || piece.r == 0
+          @board[piece.r][piece.c] = piece.promote
+        end
       end
     end
   end

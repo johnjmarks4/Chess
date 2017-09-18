@@ -1,10 +1,10 @@
-require 'C:\Users\johnj\odin-project\chess2\lib\board.rb'
-require 'C:\Users\johnj\odin-project\chess2\lib\queen.rb'
-require 'C:\Users\johnj\odin-project\chess2\lib\king.rb'
-require 'C:\Users\johnj\odin-project\chess2\lib\pawn.rb'
-require 'C:\Users\johnj\odin-project\chess2\lib\bishop.rb'
-require 'C:\Users\johnj\odin-project\chess2\lib\rook.rb'
-require 'C:\Users\johnj\odin-project\chess2\lib\knight.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\board.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\queen.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\king.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\pawn.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\bishop.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\rook.rb'
+require 'C:\Users\johnj\odin-project\chess\lib\knight.rb'
 
 describe Board do
 
@@ -15,9 +15,9 @@ describe Board do
     it "recognizes fool's mate" do
       board.board[1][5] = " "
       board.board[1][6] = " "
-      board.board[2][5] = Pawn.new(2, 5, "p", "w", board)
-      board.board[3][6] = Pawn.new(3, 6, "p", "w", board)
-      board.board[3][7] = Queen.new(3, 7, "q", "b", board)
+      board.board[2][5] = Pawn.new(2, 5, "w", board)
+      board.board[3][6] = Pawn.new(3, 6, "w", board)
+      board.board[3][7] = Queen.new(3, 7, "b", board)
       king = board.board[0][5]
 
       expect(board.checkmate?).to eql(true)
@@ -25,13 +25,13 @@ describe Board do
 
     it "recognizes checkmate" do
       board.board.each { |rows| rows.map! { |squares| squares = " " } }
-      king = King.new(2, 2, "k", "b", board)
+      king = King.new(2, 2, "b", board)
       board.board[2][2] = king
-      board.board[3][2] = Bishop.new(3, 2, "b", "w", board)
-      board.board[4][3] = Bishop.new(4, 3, "b", "w", board)
-      board.board[5][2] = Knight.new(5, 2, "h", "w", board)
-      board.board[1][5] = Rook.new(1, 5, "r", "w", board)
-      board.board[0][2] = Rook.new(0, 2, "r", "w", board)
+      board.board[3][2] = Bishop.new(3, 2, "w", board)
+      board.board[4][3] = Bishop.new(4, 3, "w", board)
+      board.board[5][2] = Knight.new(5, 2, "w", board)
+      board.board[1][5] = Rook.new(1, 5, "w", board)
+      board.board[0][2] = Rook.new(0, 2, "w", board)
 
       board.instance_variable_set("@turn", "b")
       board.instance_variable_set("@b_king", king)
@@ -44,12 +44,35 @@ describe Board do
       board = Board.new
       board.board.each { |rows| rows.map! { |squares| squares = " " } }
       board.instance_variable_set("@turn", "b")
-      king = King.new(4, 7, "k", "b", board)
+      king = King.new(4, 7, "b", board)
       board.board[4][7] = king
       board.instance_variable_set("@b_king", king)
-      board.board[4][0] = Rook.new(4, 0, "r", "w", board)
+      board.board[4][0] = Rook.new(4, 0, "w", board)
+      board.print_board
 
       expect(board.in_check?).to eql(true)
+    end
+
+    it "recognizes if checked player can shield king" do
+      board.board.each { |rows| rows.map! { |squares| squares = " " } }
+      board.board[2][6] = Pawn.new(2, 6, "w", board)
+      board.board[5][0] = Rook.new(5, 0, "b", board)
+      king = King.new(4, 7, "b", board)
+      board.board[4][7] = king
+      white_king = King.new(4, 5, "w", board)
+      board.board[4][5] = white_king
+      white_knight = Knight.new(4, 4, "w", board)
+      board.board[4][4] = white_knight
+      board.board[6][5] = Bishop.new(6, 5, "w", board)
+      board.board[6][7] = Bishop.new(6, 7, "b", board)
+
+      board.print_board
+
+      board.instance_variable_set("@b_king", king)
+      board.instance_variable_set("@w_king", white_king)
+      board.instance_variable_set("@white_knight1", white_knight)
+
+      expect(board.checkmate?).to eql(false)
     end
   end
 end
