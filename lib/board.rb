@@ -7,7 +7,6 @@ class Board
     @turn = "w"
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
-    @checkers = []
     set_board
     @w_king = @board[0][4]
     @b_king = @board[7][4]
@@ -115,12 +114,10 @@ class Board
 
   def check_legal(piece, user_input)
     move = find_coord(user_input)
-    remove_if_checker(move)
     temp_move(piece, move)
     if in_check?
       puts "That move would place you in check. Please select another move."
       undo_temp_move
-      @checkers << @board[move[0]][move[1]]
       check_legal(piece, user_input)
     else
       undo_temp_move
@@ -147,33 +144,27 @@ class Board
     end
   end
 
-  def remove_if_checker(coord)
-    if @board[coord[0]][coord[1]].is_a?(Piece)
-      if @checkers.any? { |c| [c.r, c.c] == coord }
-        @checkers.delete(@board[coord[0]][coord[1]])
-      end
-    end
-  end
-
   def in_check?
     @turn == "w" ? king = @w_king : king = @b_king
+    checkers = []
     @board.each do |r|
       r.each do |s|
         if s.is_a?(Piece) && s.color != @turn && s.show_moves.include?([king.r, king.c])
-          @checkers << s
-          @checkers.uniq!
-        else
-          if @checkers.include?(s) then @checkers.delete(s) end
+          checkers << s
+          checkers.uniq!
         end
       end
     end
 
-    @checkers.length > 0 ? true : false
+    if checkers.length > 0 
+      checkers
+    else
+      false
+    end
   end
 
   def checkmate?
-    in_check?
-    if @checkers.any? { |e| e.is_a?(Piece) }
+    if in_check? != false
       return false if king_escape?
       return false if shield_king?
       puts "\nCheckmate, player #{@turn} has lost"
@@ -185,7 +176,6 @@ class Board
   def king_escape?
     @turn == "w" ? king = @w_king : king = @b_king
     king.show_moves.each do |m|
-      remove_if_checker(m)
       temp_move(king, m)
       if in_check? == false
         undo_temp_move
@@ -201,18 +191,21 @@ class Board
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
     can_block_route = []
-    @checkers.each do |checker|
-      route = draw_route(king, checker)
-      route.reject! { |e| e == [king.r, king.c] }
-      @board.each do |r|
-        r.each do |s|
-          if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
-            s.show_moves.each do |m|
-              if route.include?(m)
-                temp_move(s, m)
-                still_in_check = in_check?
-                undo_temp_move
-                return true if still_in_check == false
+    checkers = in_check?
+    if checkers != false
+      checkers.each do |checker|
+        route = draw_route(king, checker)
+        route.reject! { |e| e == [king.r, king.c] }
+        @board.each do |r|
+          r.each do |s|
+            if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
+              s.show_moves.each do |m|
+                if route.include?(m)
+                  temp_move(s, m)
+                  still_in_check = in_check?
+                  undo_temp_move
+                  return true if still_in_check == false
+                end
               end
             end
           end

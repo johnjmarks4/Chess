@@ -47,7 +47,6 @@ class Piece
     def can_take_piece?(square)
       if square.is_a?(Piece)
         if square.color != @color
-          if square.is_a?(King) then @board.checkers << self end
           @container << [square.r, square.c]
           true
         else

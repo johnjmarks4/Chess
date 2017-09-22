@@ -12,8 +12,8 @@ class Pawn < Piece
     end
 
     if starting_position?
-      moves << [@r + 2, @c] if @color == "w" && !occupied?([@r + 1, @c])
-      moves << [@r - 2, @c] if @color == "b" && !occupied?([@r - 1, @c])
+      moves << [@r + 2, @c] if @color == "w" && @board.board[@r + 2][@c] == " "
+      moves << [@r - 2, @c] if @color == "b" && @board.board[@r - 2][@c] == " "
     end
 
     diagonals = [[@r + 1, @c + 1], [@r + 1, @c - 1]] if @color == "w"
