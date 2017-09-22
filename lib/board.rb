@@ -24,7 +24,7 @@ class Board
   end
 
   def set_board
-    pieces = ["King", "Queen", "Bishop", "Knight", "Rook"]
+    pieces = ["King", "Queen", "Bishop", "Knight", "Rook", "Pawn"]
     set_pieces(pieces, 0, 0, 4)
   end
 
@@ -33,11 +33,15 @@ class Board
       return
     else
       @board[x][y] = Piece.const_get(pieces[i]).new(x, y, "w", self)
-      if y < 5  
+      if y < 5 && x == 0
         set_pieces(pieces, i+=1, x, y-=1)  
-        y, i, pieces = 4, -1, pieces[2..-1]
+        pieces, i, y = pieces[2..-1], -1, 4
       end
-      set_pieces(pieces, i+=1, x, y+=1)
+      if y > 3 && x == 0
+        set_pieces(pieces, i+=1, x, y+=1)
+        i, x, y = -1, 1, -1
+      end
+      set_pieces(pieces, i, x, y+=1)
     end
   end
 
