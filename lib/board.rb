@@ -9,6 +9,8 @@ class Board
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     @checkers = []
     set_board
+    @w_king = @board[0][4]
+    @b_king = @board[7][5]
     @stash = []
   end
 
