@@ -79,7 +79,17 @@ describe Board do
       board.board[6][3] = Pawn.new(6, 3, "w", board)
       board.instance_variable_set("@turn", "b")
 
-      expect(board.in_check?).not_to eql(true)
+      expect(board.in_check?).not_to eql(false)
+      expect(board.checkmate?).to eql(false)
+    end
+
+    it "recognizes if king can be shielded from knight" do
+      board = Board.new
+      board.set_board
+      board.board[5][3] = Knight.new(5, 3, "w", board)
+      board.instance_variable_set("@turn", "b")
+
+      expect(board.in_check?).not_to eql(false)
       expect(board.checkmate?).to eql(false)
     end
   end

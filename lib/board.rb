@@ -188,13 +188,20 @@ class Board
     false
   end
 
+  # This should be refactored.
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
     can_block_route = []
     checkers = in_check?
     if checkers != false
       checkers.each do |checker|
-        route = draw_route(king, checker)
+
+        if checker.is_a?(Knight)
+          route = [[checker.r, checker.c]]
+        else
+          route = draw_route(king, checker)
+        end
+
         route.reject! { |e| e == [king.r, king.c] }
         @board.each do |r|
           r.each do |s|
