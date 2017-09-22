@@ -24,36 +24,21 @@ class Board
   end
 
   def set_board
-    i = 0
-    8.times do
-      pawn = Pawn.new(1, i, "w", self)
-      @board[1][i] = pawn
-      i += 1
-    end
+    pieces = ["King", "Queen", "Bishop", "Knight", "Rook"]
+    set_pieces(pieces, 0, 0, 4)
+  end
 
-    i = 0
-    8.times do
-      pawn = Pawn.new(6, i, "b", self)
-      @board[6][i] = pawn
-      i += 1
+  def set_pieces(pieces, i, x, y)
+    if y > 7 || y < 0
+      return
+    else
+      @board[x][y] = Piece.const_get(pieces[i]).new(x, y, "w", self)
+      if y < 5  
+        set_pieces(pieces, i+=1, x, y-=1)  
+        y, i, pieces = 4, -1, pieces[2..-1]
+      end
+      set_pieces(pieces, i+=1, x, y+=1)
     end
-
-    @board[7][4] = @b_king = King.new(7, 4, "b", self)
-    @board[0][4] = @w_king = King.new(0, 4, "w", self)
-    @board[7][3] = Queen.new(7, 3, "b", self)
-    @board[0][3] = Queen.new(0, 3, "w", self)
-    @board[7][2] = Bishop.new(7, 2, "b", self)
-    @board[7][5] = Bishop.new(7, 5, "b", self)
-    @board[0][2] = Bishop.new(0, 2, "w", self)
-    @board[0][5] = Bishop.new(0, 5, "w", self)
-    @board[7][1] = Knight.new(7, 1, "b", self)
-    @board[7][6] = Knight.new(7, 6, "b", self)
-    @board[0][1] = Knight.new(0, 1, "w", self)
-    @board[0][6] = Knight.new(0, 6, "w", self)
-    @board[7][0] = Rook.new(7, 0, "b", self)
-    @board[7][7] = Rook.new(7, 7, "b", self)
-    @board[0][0] = Rook.new(0, 0, "w", self)
-    @board[0][7] = Rook.new(0, 7, "w", self)
   end
 
   def print_board
