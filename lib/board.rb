@@ -10,7 +10,7 @@ class Board
     @checkers = []
     set_board
     @w_king = @board[0][4]
-    @b_king = @board[7][5]
+    @b_king = @board[7][4]
     @stash = []
   end
 
