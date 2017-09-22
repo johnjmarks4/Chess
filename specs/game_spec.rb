@@ -21,6 +21,7 @@ describe Board do
       king = board.board[0][4]
       board.instance_variable_set("@turn", "w")
       board.instance_variable_set("@w_king", king)
+      board.print_board
 
       expect(board.checkmate?).to eql(true)
     end
@@ -77,7 +78,6 @@ describe Board do
       board = Board.new
       board.board[6][3] = Pawn.new(6, 3, "w", board)
       board.instance_variable_set("@turn", "b")
-      board.print_board
 
       expect(board.in_check?).to eql(true)
       expect(board.checkmate?).to eql(false)
