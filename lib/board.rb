@@ -105,10 +105,10 @@ class Board
       castle
     else
       move = check_legal(piece, user_input)
+      @board[move[0]][move[1]] = piece
+      piece.r, piece.c = move[0], move[1]
     end
     @can_castle = ""
-    @board[move[0]][move[1]] = piece
-    piece.r, piece.c = move[0], move[1]
     promote_pawn(piece)
   end
 
