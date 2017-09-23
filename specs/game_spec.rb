@@ -92,5 +92,16 @@ describe Board do
       expect(board.in_check?).not_to eql(false)
       expect(board.checkmate?).to eql(false)
     end
+
+    it "gives player option to castle" do
+      board.board.each { |rows| rows.map! { |squares| squares = " " } }
+      board.board[0][0] = Rook.new(0, 0, "w", board)
+      board.board[0][4] = King.new(0, 4, "w", board)
+      board.instance_variable_set("@turn", "w")
+      board.board[0][4].show_moves
+      board.print_board
+
+      expect(board.can_castle).not_to eql("")
+    end
   end
 end

@@ -1,7 +1,7 @@
 require 'yaml'
 
 class Board
-  attr_accessor :board, :checkers
+  attr_accessor :board, :checkers, :can_castle
 
   def initialize
     @turn = "w"
@@ -10,6 +10,7 @@ class Board
     set_board
     @w_king = @board[0][4]
     @b_king = @board[7][4]
+    @can_castle = ""
     @stash = []
   end
 
@@ -52,8 +53,8 @@ class Board
   def print_board
     #NOTE: requires unicode-supported font to display pieces. For Windows, try DejaVu Sans Mono.
     print "\n\n  "
-    (0..7).to_a.reverse.each do |i|
-      r = @board[i][0..7].map! { |square| square != " " ? square = square.unicode : square }
+    (1..8).to_a.reverse.each do |i|
+      r = @board[i-1][0..7].map! { |square| square != " " ? square = square.unicode : square }
       33.times { print "-" }
       puts "\n" + "#{i} " + "| " + r.join(" | ") + " |" + "\n"
       print "  "
@@ -100,10 +101,21 @@ class Board
 
   def move(piece)
     user_input = choose_move(piece)
-    move = check_legal(piece, user_input)
+    if user_input.downcase == "castle"
+      castle
+    else
+      move = check_legal(piece, user_input)
+    end
+    @can_castle = ""
     @board[move[0]][move[1]] = piece
     piece.r, piece.c = move[0], move[1]
     promote_pawn(piece)
+  end
+
+  def castle
+    king, rook = @can_castle[0], @can_castle[1]
+    @board[rook.r][rook.c], @board[king.r][king.c] = king, rook
+    king.r, king.c = rook.r, rook.c
   end
 
   def promote_pawn(piece)
@@ -127,6 +139,7 @@ class Board
 
   def choose_move(piece)
     moves = piece.show_moves.map { |m| convert_notation(m) }
+    moves << "castle: #{@castle}" if !@castle.empty?
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
@@ -156,11 +169,7 @@ class Board
       end
     end
 
-    if checkers.length > 0 
-      checkers
-    else
-      false
-    end
+    checkers.length > 0 ? checkers : false
   end
 
   def checkmate?
