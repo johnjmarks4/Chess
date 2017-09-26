@@ -80,15 +80,18 @@ class Board
     puts "\nPlayer #{@turn}, please select the piece you would like to move."
     input = gets.chomp!
     piece = find_coord(input)
-    if piece.length == 2 && !piece.include?(nil)
-      if obj(piece).is_a?(Piece)
-        if obj(piece).color == @turn
-          obj(piece)
-        else
-          puts "\nPlayer #{@turn}, that piece does not belong to you."
-          select_piece
-        end
+
+    if  piece.length == 2 && 
+        !piece.include?(nil) && 
+        obj(piece).is_a?(Piece)
+
+      if obj(piece).color == @turn
+        obj(piece)
+      else
+        puts "\nPlayer #{@turn}, that piece does not belong to you."
+        select_piece
       end
+      
     elsif input.downcase == "save"
       save
       select_piece
@@ -107,6 +110,10 @@ class Board
       move = check_legal(piece, user_input)
       @board[move[0]][move[1]] = piece
       piece.r, piece.c = move[0], move[1]
+      piece.total_moves += 1
+      if piece.is_a?(Pawn) && piece.ep_pawn.include?(move)
+        @board[move[0]-1][move[1]] = " "
+      end
     end
     @can_castle = ""
     promote_pawn(piece)
@@ -139,7 +146,7 @@ class Board
 
   def choose_move(piece)
     moves = piece.show_moves.map { |m| convert_notation(m) }
-    moves << "castle: #{@castle}" if !@castle.empty?
+    moves << "castle: #{@can_castle}" if !@can_castle.empty?
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!

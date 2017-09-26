@@ -99,9 +99,23 @@ describe Board do
       board.board[0][4] = King.new(0, 4, "w", board)
       board.instance_variable_set("@turn", "w")
       board.board[0][4].show_moves
-      board.print_board
 
       expect(board.can_castle).not_to eql("")
+    end
+
+    it "recognizes en passant" do
+      board = Board.new
+      board.board[5][3] = Pawn.new(5, 3, "w", board)
+      pawn1 = Pawn.new(5, 4, "b", board)
+      pawn1.instance_variable_set("@moves", "1")
+      board.board[5][4] = pawn1
+      pawn2 = Pawn.new(5, 2, "b", board)
+      pawn2.instance_variable_set("@moves", "1")
+      board.board[5][2] = pawn2
+      board.instance_variable_set("@turn", "w")
+
+      expect(board.board[5][3].show_moves).to include [6, 2]
+      expect(board.board[5][3].show_moves).to include [6, 4]
     end
   end
 end

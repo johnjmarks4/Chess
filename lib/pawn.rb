@@ -1,9 +1,21 @@
 require_relative 'piece'
 
 class Pawn < Piece
+  attr_accessor :ep_pawn
+
+  def first_move?
+    true if @total_moves < 2
+  end
 
   def show_moves
     moves = []
+
+    ep = en_passant
+    if !ep.empty?
+      ep.each { |e| moves << e }
+    else
+      @ep_pawn = []
+    end
 
     if on_board?([@r + 1, @c]) && @color == "w"
       moves << [@r + 1, @c] if !@board.board[@r+1][@c].is_a?(Piece)
@@ -43,11 +55,35 @@ class Pawn < Piece
   end
 
   private
-  
+
+    def en_passant
+      @color == "w" ? r = 4 : r = 2
+      con = []
+      if @r == r
+        c = @c + 1
+        2.times do
+          square = @board.board[r][c]
+          square.is_a?(Pawn) && square.first_move?
+
+          if  square.is_a?(Pawn) &&
+              square.color != @color &&
+              square.first_move?
+
+            con << [r+1, c]
+          end
+          c = @c - 1
+        end
+      end
+      if !con.empty?
+        con.each { |m| @ep_pawn << m }
+      end
+      con
+    end
+
     def starting_position?
-      if @color == "b" 
+      if @color == "b"
         @r == 6
-      elsif @color == "w" 
+      elsif @color == "w"
         @r == 1
       end
     end
