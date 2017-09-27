@@ -16,9 +16,9 @@ class Rook < Piece
   end
 
   def castle
-    # Make sure it only accepts first moves
     route = @board.draw_route([@r, @c], [0, 4]) if @color == "w"
     route = @board.draw_route([@r, @c], [7, 4]) if @color == "b"
+    route.reverse! if @c == 7
     route.map! { |s| @board.board[s.first][s.last] }
 
     if @color == "w" && @r == 0 && @c == 0 ||
@@ -27,10 +27,13 @@ class Rook < Piece
        @color == "b" && @r == 7 && @c == 7
        
       if route[-1].is_a?(King) && 
+         route[-1].total_moves == 0 &&
+         @total_moves == 0 &&
          route[1..-2].all? { |s| s == " " } && 
          route[-1].color == @color
 
-        @board.can_castle = [route[-1], self]
+        @board.can_castle << [route[-1], self]
+
       end
     end
   end

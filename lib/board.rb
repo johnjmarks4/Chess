@@ -10,7 +10,7 @@ class Board
     set_board
     @w_king = @board[0][4]
     @b_king = @board[7][4]
-    @can_castle = ""
+    @can_castle = []
     @stash = []
   end
 
@@ -103,6 +103,7 @@ class Board
   end
 
   def move(piece)
+    @can_castle = []
     user_input = choose_move(piece)
     if user_input.downcase == "castle"
       castle
@@ -114,19 +115,42 @@ class Board
       if piece.is_a?(Pawn) && piece.ep_pawn.include?(move)
         @board[move[0]-1][move[1]] = " "
       end
+      promote_pawn(piece) if piece.is_a?(Pawn)
     end
-    @can_castle = ""
-    promote_pawn(piece)
   end
 
   def castle
-    king, rook = @can_castle[0], @can_castle[1]
+    king = @can_castle[0][0]
+    rook_num = []
+    rook = ""
+
+    if @can_castle.length > 1
+      (0..1).each do |i|
+        rook_num << convert_notation([@can_castle[i][1].r, @can_castle[i][1].c])
+      end
+      print "Which rook would you like to castle, #{rook_num[0]} or #{rook_num[1]}?\n"
+      input = gets.chomp!
+      (0..1).each do |i|
+        if input == "#{rook_num[i]}"
+          input = find_coord(input)
+          rook = @board[input.first][input.last]
+        elsif i > 0 && rook.nil?
+          print "\nYour input was not understood. Please try again.\n"
+          return castle
+        end
+      end
+
+    else
+      rook = @can_castle[0][1]
+    end
+
     @board[rook.r][rook.c], @board[king.r][king.c] = king, rook
-    king.r, king.c = rook.r, rook.c
+    king.r, rook.r = rook.r, king.r
+    king.c, rook.c = rook.c, king.c
   end
 
   def promote_pawn(piece)
-    if piece.is_a?(Pawn) && piece.r == 7 || piece.r == 0
+    if piece.r == 7 || piece.r == 0
       @board[piece.r][piece.c] = piece.promote
     end
   end
@@ -146,7 +170,9 @@ class Board
 
   def choose_move(piece)
     moves = piece.show_moves.map { |m| convert_notation(m) }
-    moves << "castle: #{@can_castle}" if !@can_castle.empty?
+    if !@can_castle.empty?
+      moves << "or type 'castle' to make your king and rook swap positions"
+    end
     puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
     puts "Please select your move, or type 'cancel' to select another piece."
     input = gets.chomp!
@@ -156,6 +182,8 @@ class Board
     elsif input.downcase == "cancel"
       piece = select_piece
       return choose_move(piece)
+    elsif input.downcase == "castle"
+      return input
     elsif moves.include?(input) == false
       puts "Your selection was not recognized. Please try again."
       return choose_move(piece)
