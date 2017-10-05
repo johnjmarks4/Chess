@@ -80,18 +80,25 @@ class Board
     puts "\nPlayer #{@turn}, please select the piece you would like to move."
     input = gets.chomp!
     piece = find_coord(input)
+    validate(piece, input)
+  end
 
-    if  piece.length == 2 && 
-        !piece.include?(nil) && 
-        obj(piece).is_a?(Piece)
+  def validate(piece, input)
+    if piece.length == 2 && 
+       !piece.include?(nil) && 
+       obj(piece).is_a?(Piece) &&
+       obj(piece).color == @turn
+       
+      return obj(piece)
+    end
 
-      if obj(piece).color == @turn
-        obj(piece)
-      else
-        puts "\nPlayer #{@turn}, that piece does not belong to you."
-        select_piece
-      end
-      
+    error_messages(piece, input)
+  end
+
+  def error_messages(piece, input)
+    if piece.is_a?(Piece) && piece.color != @turn
+      puts "\nPlayer #{@turn}, that piece does not belong to you."
+      select_piece
     elsif input.downcase == "save"
       save
       select_piece
