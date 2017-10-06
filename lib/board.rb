@@ -19,8 +19,7 @@ class Board
     loop do
       print_board
       break if checkmate?
-      piece = select_piece
-      move(piece)
+      move
       switch_turn
     end
   end
@@ -76,126 +75,111 @@ class Board
     puts "\nYour game has been successfully saved\n"
   end
 
-  def select_piece
+  def move(*arg)
+    # fix case format
+    # fix use of proc
     puts "\nPlayer #{@turn}, please select the piece you would like to move."
-    input = gets.chomp!
-    piece = find_coord(input)
-    validate(piece, input)
-  end
+    piece = check_for_keywords(gets.chomp!)
+    return piece if piece.is_a?(Proc)
 
-  def validate(piece, input)
-    if piece.length == 2 && 
-       !piece.include?(nil) && 
-       obj(piece).is_a?(Piece) &&
-       obj(piece).color == @turn
-       
-      return obj(piece)
+    puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{piece.show_moves}\n"
+    puts "Please select your move, or type 'cancel' to select another piece."
+    move = check_for_keywords(gets.chomp!)
+    return move if move.is_a?(Proc)
+
+    unless @board[move.first][move.last].color != @color
+      @board[piece.r][piece.c] = " "
+      @board[move.first][move.last] = piece
+      piece.r, piece.c = move.first, move.last
+      error_messages(:check_error) if in_check? #fix so you can quickly undo
+    else
+      error_messages(:color_error)
     end
 
-    error_messages(piece, input)
+    rescue => e 
+      error_messages(e)
+    end
   end
 
-  def error_messages(piece, input)
-    if piece.is_a?(Piece) && piece.color != @turn
-      puts "\nPlayer #{@turn}, that piece does not belong to you."
-      select_piece
-    elsif input.downcase == "save"
-      save
-      select_piece
+  def check_for_keywords(input)
+    keywords = ["save", "cancel", "castle"]
+    if keywords.include?(input.downcase)
+      handle_keywords(input)
     else
+      find_coord(input)
+    end
+  end
+
+  def error_messages(e)
+    case e
+    when NoMethodError
       puts "\nYour input was not understood, or you do not have a piece with open moves at that square."
       puts "Please select a piece in the following format: 2a."
-      select_piece
+
+    when :color_error
+      puts "\nPlayer #{@turn}, that piece does not belong to you."
+
+    when :check_error
+      puts "\nThat move would place you in check. Please select another move."
+
     end
+    move
   end
 
-  def move(piece)
-    @can_castle = []
-    user_input = choose_move(piece)
-    if user_input.downcase == "castle"
-      castle
+  def handle_keyword(k)
+    case k
+    when "save"
+      save
+      return move
+    when "cancel"
+      key_method = Proc.new do
+        move
+      end
+    when "castle"
+      key_method = Proc.new do
+        return castle(piece)
+      end
+    end
+    key_method
+  end
+
+  def castle(piece)
+    castle = can_castle(piece)
+  
+    puts "Input the first piece you would like to castle."
+    first = find_coords(input.chomp!)
+    puts "Input the second piece you would like to castle."
+    second = find_coords(input.chomp!)
+
+    #this might cause problems, especially regarding the depth of the array
+    if [first & second & castle].length > 1
+      # Not sure if this will work
+      swap(@board[first.first][first.last], @board[second.first][second.last])
     else
-      move = check_legal(piece, user_input)
-      @board[move[0]][move[1]] = piece
-      piece.r, piece.c = move[0], move[1]
-      piece.total_moves += 1
-      if piece.is_a?(Pawn) && piece.ep_pawn.include?(move)
-        @board[move[0]-1][move[1]] = " "
-      end
-      promote_pawn(piece) if piece.is_a?(Pawn)
+      puts "You do not have the pieces necessary to castle. Please select another move."
+      move
     end
   end
 
-  def castle
-    king = @can_castle[0][0]
-    rook_num = []
-    rook = ""
+  def swap(x, y)
+    x, y = y, x
+  end
 
-    if @can_castle.length > 1
-      (0..1).each do |i|
-        rook_num << convert_notation([@can_castle[i][1].r, @can_castle[i][1].c])
-      end
-      print "Which rook would you like to castle, #{rook_num[0]} or #{rook_num[1]}?\n"
-      input = gets.chomp!
-      (0..1).each do |i|
-        if input == "#{rook_num[i]}"
-          input = find_coord(input)
-          rook = @board[input.first][input.last]
-        elsif i > 0 && rook.nil?
-          print "\nYour input was not understood. Please try again.\n"
-          return castle
+  def can_castle(piece)
+    can = []
+    [piece, @board[0][0], @board[0][7], @board[7][0], @board[7][7]].each do |s|
+      if s.is_a?(Rook) || s.is_a?(King)
+        if s.color == piece.color && s.total_moves = 0
+          can << s
         end
       end
-
-    else
-      rook = @can_castle[0][1]
     end
-
-    @board[rook.r][rook.c], @board[king.r][king.c] = king, rook
-    king.r, rook.r = rook.r, king.r
-    king.c, rook.c = rook.c, king.c
+    can
   end
 
   def promote_pawn(piece)
     if piece.r == 7 || piece.r == 0
       @board[piece.r][piece.c] = piece.promote
-    end
-  end
-
-  def check_legal(piece, user_input)
-    move = find_coord(user_input)
-    temp_move(piece, move)
-    if in_check?
-      puts "That move would place you in check. Please select another move."
-      undo_temp_move
-      check_legal(piece, user_input)
-    else
-      undo_temp_move
-      move
-    end
-  end
-
-  def choose_move(piece)
-    moves = piece.show_moves.map { |m| convert_notation(m) }
-    if !@can_castle.empty?
-      moves << "or type 'castle' to make your king and rook swap positions"
-    end
-    puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
-    puts "Please select your move, or type 'cancel' to select another piece."
-    input = gets.chomp!
-    if input.downcase == "save"
-      save
-      return choose_move(piece)
-    elsif input.downcase == "cancel"
-      piece = select_piece
-      return choose_move(piece)
-    elsif input.downcase == "castle"
-      return input
-    elsif moves.include?(input) == false
-      puts "Your selection was not recognized. Please try again."
-      return choose_move(piece)
-    else
-      input
     end
   end
 
