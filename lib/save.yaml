@@ -1,16 +1,16 @@
 --- &1 !ruby/object:Board
-turn: b
+turn: w
 board:
 - - !ruby/object:Rook
+    total_moves: 0
     r: 0
     c: 0
     color: w
-    container:
-    - - 1
-      - 0
+    container: []
     board: *1
     unicode: "♜"
   - !ruby/object:Knight
+    total_moves: 0
     r: 0
     c: 1
     color: w
@@ -18,6 +18,7 @@ board:
     board: *1
     unicode: "♞"
   - !ruby/object:Bishop
+    total_moves: 0
     r: 0
     c: 2
     color: w
@@ -25,13 +26,15 @@ board:
     board: *1
     unicode: "♝"
   - !ruby/object:Queen
+    total_moves: 0
     r: 0
     c: 3
     color: w
     container: []
     board: *1
     unicode: "♛"
-  - &3 !ruby/object:King
+  - &2 !ruby/object:King
+    total_moves: 0
     r: 0
     c: 4
     color: w
@@ -39,6 +42,7 @@ board:
     board: *1
     unicode: "♚"
   - !ruby/object:Bishop
+    total_moves: 0
     r: 0
     c: 5
     color: w
@@ -46,6 +50,7 @@ board:
     board: *1
     unicode: "♝"
   - !ruby/object:Knight
+    total_moves: 0
     r: 0
     c: 6
     color: w
@@ -53,21 +58,32 @@ board:
     board: *1
     unicode: "♞"
   - !ruby/object:Rook
+    total_moves: 0
     r: 0
     c: 7
     color: w
     container: []
     board: *1
     unicode: "♜"
-- - " "
+- - !ruby/object:Pawn
+    total_moves: 0
+    r: 1
+    c: 0
+    color: w
+    container: []
+    board: *1
+    unicode: "♟"
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 1
     color: w
     container: []
     board: *1
     unicode: "♟"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 2
     color: w
@@ -75,6 +91,7 @@ board:
     board: *1
     unicode: "♟"
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 3
     color: w
@@ -82,6 +99,7 @@ board:
     board: *1
     unicode: "♟"
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 4
     color: w
@@ -89,6 +107,7 @@ board:
     board: *1
     unicode: "♟"
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 5
     color: w
@@ -96,6 +115,7 @@ board:
     board: *1
     unicode: "♟"
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 6
     color: w
@@ -103,19 +123,14 @@ board:
     board: *1
     unicode: "♟"
   - !ruby/object:Pawn
+    total_moves: 0
     r: 1
     c: 7
     color: w
     container: []
     board: *1
     unicode: "♟"
-- - !ruby/object:Pawn
-    r: 2
-    c: 0
-    color: w
-    container: []
-    board: *1
-    unicode: "♟"
+- - " "
   - " "
   - " "
   - " "
@@ -148,62 +163,79 @@ board:
   - " "
   - " "
 - - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 0
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 1
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 2
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 3
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 4
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 5
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 6
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
   - !ruby/object:Pawn
+    total_moves: 0
     r: 6
     c: 7
     color: b
     container: []
     board: *1
     unicode: "♙"
+    ep_pawn: []
 - - !ruby/object:Rook
+    total_moves: 0
     r: 7
     c: 0
     color: b
@@ -211,6 +243,7 @@ board:
     board: *1
     unicode: "♖"
   - !ruby/object:Knight
+    total_moves: 0
     r: 7
     c: 1
     color: b
@@ -218,6 +251,7 @@ board:
     board: *1
     unicode: "♘"
   - !ruby/object:Bishop
+    total_moves: 0
     r: 7
     c: 2
     color: b
@@ -225,13 +259,15 @@ board:
     board: *1
     unicode: "♗"
   - !ruby/object:Queen
+    total_moves: 0
     r: 7
     c: 3
     color: b
     container: []
     board: *1
     unicode: "♕"
-  - &2 !ruby/object:King
+  - &3 !ruby/object:King
+    total_moves: 0
     r: 7
     c: 4
     color: b
@@ -239,6 +275,7 @@ board:
     board: *1
     unicode: "♔"
   - !ruby/object:Bishop
+    total_moves: 0
     r: 7
     c: 5
     color: b
@@ -246,6 +283,7 @@ board:
     board: *1
     unicode: "♗"
   - !ruby/object:Knight
+    total_moves: 0
     r: 7
     c: 6
     color: b
@@ -253,13 +291,14 @@ board:
     board: *1
     unicode: "♘"
   - !ruby/object:Rook
+    total_moves: 0
     r: 7
     c: 7
     color: b
     container: []
     board: *1
     unicode: "♖"
-b_king: *2
-w_king: *3
-checkers: []
+w_king: *2
+b_king: *3
+can_castle: []
 stash: []

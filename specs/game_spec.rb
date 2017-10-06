@@ -21,7 +21,6 @@ describe Board do
       king = board.board[0][4]
       board.instance_variable_set("@turn", "w")
       board.instance_variable_set("@w_king", king)
-      board.print_board
 
       expect(board.checkmate?).to eql(true)
     end
@@ -93,14 +92,14 @@ describe Board do
       expect(board.checkmate?).to eql(false)
     end
 
-    it "gives player option to castle" do
+    it "recognizes opportunity to castle" do
       board.board.each { |rows| rows.map! { |squares| squares = " " } }
       board.board[0][0] = Rook.new(0, 0, "w", board)
-      board.board[0][4] = King.new(0, 4, "w", board)
+      king = King.new(0, 4, "w", board)
+      board.board[0][4] = king
       board.instance_variable_set("@turn", "w")
-      board.board[0][4].show_moves
 
-      expect(board.can_castle).not_to eql("")
+      expect(board.can_castle(king).length).to be > 1
     end
 
     it "recognizes en passant" do

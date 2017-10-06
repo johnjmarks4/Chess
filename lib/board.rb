@@ -67,6 +67,7 @@ class Board
     @turn == "w" ? @turn = "b" : @turn = "w"
   end
 
+  # make so it can save over old games - or save multiple games
   def save
     saved_game = YAML::dump(self)
     f = File.new("save.yaml", "w")
@@ -75,26 +76,27 @@ class Board
     puts "\nYour game has been successfully saved\n"
   end
 
-  def move(*arg)
-    # fix case format
-    # fix use of proc
-    puts "\nPlayer #{@turn}, please select the piece you would like to move."
-    piece = check_for_keywords(gets.chomp!)
-    return piece if piece.is_a?(Proc)
+  def move
+    begin
 
-    puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{piece.show_moves}\n"
-    puts "Please select your move, or type 'cancel' to select another piece."
-    move = check_for_keywords(gets.chomp!)
-    return move if move.is_a?(Proc)
+      puts "\nPlayer #{@turn}, please select the piece you would like to move."
+      piece = check_for_keywords(gets.chomp!)
+      return piece.call if piece.is_a?(Proc)
+      piece = obj(piece)
+      return error_messages(:color_error) if piece.color != @turn
+      moves = piece.show_moves.map { |m| translate(m) }
+      moves << "castle" if !can_castle(piece).empty?
+      return error_messages(:no_moves_error) if moves.empty?
 
-    unless @board[move.first][move.last].color != @color
+      puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
+      puts "Please select your move, or type 'cancel' to select another piece."
+      move = check_for_keywords(gets.chomp!)
+      return [piece].each(&move) if move.is_a?(Proc)
+
       @board[piece.r][piece.c] = " "
       @board[move.first][move.last] = piece
       piece.r, piece.c = move.first, move.last
-      error_messages(:check_error) if in_check? #fix so you can quickly undo
-    else
-      error_messages(:color_error)
-    end
+      error_messages(:check_error) if in_check? #fix so you can quickly undo - cache?
 
     rescue => e 
       error_messages(e)
@@ -102,11 +104,21 @@ class Board
   end
 
   def check_for_keywords(input)
+    input.downcase!
     keywords = ["save", "cancel", "castle"]
-    if keywords.include?(input.downcase)
-      handle_keywords(input)
+
+    if keywords.include?(input)
+      handle_keyword(input)
     else
+      translate(input)
+    end
+  end
+
+  def translate(input)
+    if input.is_a?(String)
       find_coord(input)
+    else
+      convert_notation(input)
     end
   end
 
@@ -122,6 +134,9 @@ class Board
     when :check_error
       puts "\nThat move would place you in check. Please select another move."
 
+    when :no_moves_error
+      puts "\nThat piece does not have any open moves. Please select another move."
+
     end
     move
   end
@@ -130,31 +145,29 @@ class Board
     case k
     when "save"
       save
-      return move
+      key_method = Proc.new { move }
     when "cancel"
-      key_method = Proc.new do
-        move
-      end
+      key_method = Proc.new { move }
     when "castle"
-      key_method = Proc.new do
-        return castle(piece)
-      end
+      key_method = Proc.new { |piece| castle(piece) }
     end
     key_method
   end
 
   def castle(piece)
     castle = can_castle(piece)
-  
-    puts "Input the first piece you would like to castle."
-    first = find_coords(input.chomp!)
-    puts "Input the second piece you would like to castle."
-    second = find_coords(input.chomp!)
 
     #this might cause problems, especially regarding the depth of the array
-    if [first & second & castle].length > 1
+    if [[piece.r, piece.c] & castle].length > 1
+      puts "Input the piece you would like to castle."
+      piece_to_castle = translate(gets.chomp!)
       # Not sure if this will work
-      swap(@board[first.first][first.last], @board[second.first][second.last])
+      if castle.include?(piece_to_castle)
+        swap(@board[first.first][first.last], @board[second.first][second.last])
+      else
+        puts "That piece is not available to castle"
+        castle(piece)
+      end
     else
       puts "You do not have the pieces necessary to castle. Please select another move."
       move
@@ -165,6 +178,7 @@ class Board
     x, y = y, x
   end
 
+  # use an empty check on this to see if "castle" should be added to player moves
   def can_castle(piece)
     can = []
     [piece, @board[0][0], @board[0][7], @board[7][0], @board[7][7]].each do |s|
