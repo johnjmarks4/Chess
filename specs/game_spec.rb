@@ -99,7 +99,7 @@ describe Board do
       board.board[0][4] = king
       board.instance_variable_set("@turn", "w")
 
-      expect(board.can_castle(king).length).to be > 1
+      expect(board.can_castle.length).to be > 1
     end
 
     it "recognizes en passant" do

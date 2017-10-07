@@ -8,8 +8,8 @@ class Board
     @board = Array.new(8).map { Array.new(8) }
     @board.each { |rows| rows.map! { |squares| squares = " " } }
     set_board
-    #@w_king = @board[0][4]
-    #@b_king = @board[7][4]
+    @w_king = @board[0][4]
+    @b_king = @board[7][4]
     @stash = []
   end
 
@@ -25,17 +25,8 @@ class Board
 
   def set_board
     pieces = ["King", "Queen", "Bishop", "Knight", "Rook", "Pawn"]
-    @w_king = King.new(0, 4, "w", self)
-    @board[0][4] = @w_king
-    #@board[0][0] = Rook.new(0, 0, "w", self)
-    @board[0][7] = Rook.new(0, 7, "w", self)
-    @board[7][7] = Rook.new(7, 7, "b", self)
-    @board[7][2] = Pawn.new(7, 2, "b", self)
-    @b_king = King.new(7, 4, "b", self)
-    @board[7][4] = @b_king
-    @board[7][0] = Rook.new(7, 0, "b", self)
-    #set_pieces(pieces, 0, 0, 4)
-    #set_pieces(pieces, 0, 7, 4)
+    set_pieces(pieces, 0, 0, 4)
+    set_pieces(pieces, 0, 7, 4)
   end
 
   def set_pieces(pieces, i, x, y)
@@ -75,7 +66,6 @@ class Board
     @turn == "w" ? @turn = "b" : @turn = "w"
   end
 
-  # make so it can save over old games - or save multiple games
   def save
     saved_game = YAML::dump(self)
     f = File.new("save.yaml", "w")
@@ -102,10 +92,9 @@ class Board
       return [piece].each(&move) if move.is_a?(Proc)
 
       return implement_move(piece, move)
-=begin
+
     rescue => e 
       error_messages(e)
-=end
     end
   end
 
@@ -176,7 +165,6 @@ class Board
       cp = translate(gets.chomp!)
       swap_piece = @board[cp.first][cp.last]
 
-      #fix so the pieces don't totally swap
       if castle.include?(cp) && piece.class != swap_piece.class
         swap_piece_to = [piece.r, piece.c]
         [piece, cp, swap_piece, swap_piece_to].each_slice(2) do |x, y|
