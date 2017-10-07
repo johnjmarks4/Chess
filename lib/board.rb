@@ -10,12 +10,12 @@ class Board
     set_board
     @w_king = @board[0][4]
     @b_king = @board[7][4]
-    @stash = []
   end
 
   def play
     print "\nType 'save' at any time to save your game."
     loop do
+      @stash = []
       print_board
       break if checkmate?
       move
@@ -99,11 +99,12 @@ class Board
   end
 
   def implement_move(piece, to, *castle)
+    stash_move(piece, to)
     @board[piece.r][piece.c] = " " if castle.empty?
     @board[to.first][to.last] = piece
     piece.r, piece.c = to.first, to.last
     piece.total_moves += 1
-    error_messages(:check_error) if in_check? #fix so you can quickly undo - cache?
+    #error_messages(:check_error) if in_check?
   end
 
   def check_for_keywords(input)
@@ -136,6 +137,7 @@ class Board
 
     when :check_error
       puts "\nThat move would place you in check. Please select another move."
+      undo_move
 
     when :no_moves_error
       puts "\nThat piece does not have any open moves. Please select another move."
@@ -244,13 +246,13 @@ class Board
   def king_escape?
     @turn == "w" ? king = @w_king : king = @b_king
     king.show_moves.each do |m|
-      temp_move(king, m)
+      stash_move(king, m)
       if in_check? == false
-        undo_temp_move
+        undo_move
         @board[king.r][king.c] = king
         return true
       else
-        undo_temp_move
+        undo_move
       end
     end
     false
@@ -276,10 +278,13 @@ class Board
             if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
               s.show_moves.each do |m|
                 if route.include?(m)
-                  temp_move(s, m)
-                  still_in_check = in_check?
-                  undo_temp_move
-                  return true if still_in_check == false
+                  implement_move(s, m)
+                  if in_check?
+                    undo_move
+                  else
+                    undo_move
+                    true
+                  end
                 end
               end
             end
@@ -290,15 +295,12 @@ class Board
     false
   end
 
-  def temp_move(piece, move)
+  def stash_move(piece, move)
     @stash = []
     @stash.push(piece, piece.r, piece.c, move, @board[move[0]][move[1]])
-    @board[piece.r][piece.c] = " "
-    piece.r, piece.c = move[0], move[1]
-    @board[move[0]][move[1]] = piece
   end
 
-  def undo_temp_move
+  def undo_move
     @board[@stash[3][0]][@stash[3][1]] = @stash[4]
     @stash[0].r, @stash[0].c = @stash[1], @stash[2]
     @stash = []
