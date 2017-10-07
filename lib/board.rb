@@ -10,14 +10,12 @@ class Board
     set_board
     #@w_king = @board[0][4]
     #@b_king = @board[7][4]
-    @can_castle = []
     @stash = []
   end
 
   def play
     print "\nType 'save' at any time to save your game."
     loop do
-      puts "run"
       print_board
       break if checkmate?
       move
@@ -29,10 +27,13 @@ class Board
     pieces = ["King", "Queen", "Bishop", "Knight", "Rook", "Pawn"]
     @w_king = King.new(0, 4, "w", self)
     @board[0][4] = @w_king
-    @board[0][0] = Rook.new(0, 0, "w", self)
+    #@board[0][0] = Rook.new(0, 0, "w", self)
     @board[0][7] = Rook.new(0, 7, "w", self)
-    @b_king = King.new(7, 7, "b", self)
-    @board[7][7] = @b_king
+    @board[7][7] = Rook.new(7, 7, "b", self)
+    @board[7][2] = Pawn.new(7, 2, "b", self)
+    @b_king = King.new(7, 4, "b", self)
+    @board[7][4] = @b_king
+    @board[7][0] = Rook.new(7, 0, "b", self)
     #set_pieces(pieces, 0, 0, 4)
     #set_pieces(pieces, 0, 7, 4)
   end
@@ -92,7 +93,7 @@ class Board
       piece = obj(piece)
       return error_messages(:color_error) if piece.color != @turn
       moves = piece.show_moves.map { |m| translate(m) }
-      moves << "castle" if can_castle(piece).length > 1
+      moves << "castle" if can_castle.include?([piece.r, piece.c])
       return error_messages(:no_moves_error) if moves.empty?
 
       puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
@@ -103,14 +104,12 @@ class Board
       return implement_move(piece, move)
 =begin
     rescue => e 
-      print e
       error_messages(e)
 =end
     end
   end
 
   def implement_move(piece, to, *castle)
-    puts castle.empty?
     @board[piece.r][piece.c] = " " if castle.empty?
     @board[to.first][to.last] = piece
     piece.r, piece.c = to.first, to.last
@@ -170,17 +169,17 @@ class Board
   end
 
   def castle(piece)
-    castle = can_castle(piece)
+    castle = can_castle
 
     if castle.length > 1
       puts "Input the piece you would like to castle."
       cp = translate(gets.chomp!)
-      puts cp.inspect
+      swap_piece = @board[cp.first][cp.last]
 
-      if castle.include?(cp)
-        rook = @board[cp.first][cp.last]
-        rook_to = [piece.r, piece.c] # will mutability create problems?
-        [piece, cp, rook, rook_to].each_slice(2) do |x, y|
+      #fix so the pieces don't totally swap
+      if castle.include?(cp) && piece.class != swap_piece.class
+        swap_piece_to = [piece.r, piece.c]
+        [piece, cp, swap_piece, swap_piece_to].each_slice(2) do |x, y|
           implement_move(x, y, "castle")
         end
       else
@@ -193,7 +192,7 @@ class Board
     end
   end
 
-  def can_castle(piece)
+  def can_castle
     can = []
 
     [0, 7].each do |i|
@@ -208,15 +207,19 @@ class Board
         can << right[0] << right[-1]
       end
     end
+    can.reject! { |e| e.color != @turn }
     can.map! { |e| e = [e.r, e.c] }
     can
   end
 
   def pieces_are_swapable(slice)
-    slice[0].is_a?(King) || slice[0].is_a?(Rook) &&
-    slice[-1].is_a?(King) || slice[-1].is_a?(Rook) &&
-    slice[1..-2].all? { |e| e == "  " } &&
-    slice[0].total_moves == 0 && slice[-1].total_moves == 0
+    slice[0].is_a?(Piece) &&
+    slice[-1].is_a?(Piece) &&
+    [slice[0].is_a?(King) || slice[0].is_a?(Rook)] &&
+    [slice[-1].is_a?(King) || slice[-1].is_a?(Rook)] &&
+    slice[0].total_moves == 0 && 
+    slice[-1].total_moves == 0 &&
+    slice[1..-2].all? { |e| e == " " }
   end
 
   def promote_pawn(piece)
