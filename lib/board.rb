@@ -104,7 +104,6 @@ class Board
     @board[to.first][to.last] = piece
     piece.r, piece.c = to.first, to.last
     piece.total_moves += 1
-    #error_messages(:check_error) if in_check?
   end
 
   def check_for_keywords(input)
@@ -246,7 +245,7 @@ class Board
   def king_escape?
     @turn == "w" ? king = @w_king : king = @b_king
     king.show_moves.each do |m|
-      stash_move(king, m)
+      implement_move(king, m)
       if in_check? == false
         undo_move
         @board[king.r][king.c] = king
@@ -258,41 +257,57 @@ class Board
     false
   end
 
-  # This should be refactored.
   def shield_king?
     @turn == "w" ? king = @w_king : king = @b_king
-    can_block_route = []
     checkers = in_check?
-    if checkers != false
-      checkers.each do |checker|
+    checking_routes = []
 
-        if checker.is_a?(Knight)
-          route = [[checker.r, checker.c]]
-        else
-          route = draw_route(king, checker)
-        end
+    if !checkers == false
 
-        route.reject! { |e| e == [king.r, king.c] }
-        @board.each do |r|
-          r.each do |s|
-            if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
-              s.show_moves.each do |m|
-                if route.include?(m)
-                  implement_move(s, m)
-                  if in_check?
-                    undo_move
-                  else
-                    undo_move
-                    true
-                  end
-                end
-              end
+      friendly_pieces = all_player_pieces
+      routes = checking_routes(checkers)
+      routes.reject! { |s| s == [king.r, king.c] }
+
+      routes.each do |r|
+        friendly_pieces.each do |pc|
+          m = pc.show_moves.select { |move| r.include?(m) }
+          if !m.empty?
+            implement_move(pc, m[0])
+            if in_check? == false
+              undo_move
+              return true
+            else
+              undo_move
             end
           end
         end
       end
     end
     false
+  end
+
+  def all_player_pieces
+    pieces = []
+    @board.each do |row|
+      row.each do |s|
+        pieces << s if s.is_a?(Piece) && !s.is_a?(King) && s.color == @turn
+      end
+    end
+    pieces
+  end
+
+  def checking_routes(checkers)
+    @turn == "w" ? king = @w_king : king = @b_king
+    con = []
+    checkers.each do |c|
+      if c.is_a?(Knight)
+        route = [[c.r, c.c]]
+      else
+        route = draw_route(king, c)
+      end
+      con << route
+    end
+    con
   end
 
   def stash_move(piece, move)
