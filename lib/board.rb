@@ -270,7 +270,7 @@ class Board
 
       routes.each do |r|
         friendly_pieces.each do |pc|
-          m = pc.show_moves.select { |move| r.include?(m) }
+          m = pc.show_moves.select { |move| r.include?(move) }
           if !m.empty?
             implement_move(pc, m[0])
             if in_check? == false
