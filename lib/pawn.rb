@@ -3,6 +3,11 @@ require_relative 'piece'
 class Pawn < Piece
   attr_accessor :ep_pawn
 
+  def initialize(row, column, color, board)
+    super
+    @total_moves = 0
+  end
+
   def first_move?
     true if @total_moves < 2
   end

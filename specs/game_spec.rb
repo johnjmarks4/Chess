@@ -69,9 +69,6 @@ describe Board do
       board.instance_variable_set("@b_king", king)
       board.instance_variable_set("@w_king", white_king)
       board.instance_variable_set("@white_knight1", white_knight)
-      board.print_board
-      #board.all_player_pieces.each { |f| puts [f.class, f.color, f.r, f.c].inspect }
-      #checkers.each { |c| puts c.class }
 
       expect(board.checkmate?).to eql(false)
     end

@@ -1,7 +1,7 @@
 require 'yaml'
 
 class Board
-  attr_accessor :board, :checkers, :can_castle
+  attr_accessor :board, :checkers
 
   def initialize
     @turn = "w"
@@ -103,7 +103,7 @@ class Board
     @board[piece.r][piece.c] = " " if castle.empty?
     @board[to.first][to.last] = piece
     piece.r, piece.c = to.first, to.last
-    piece.total_moves += 1
+    piece.total_moves += 1 if [Pawn, Rook, King].include?(piece.class)
   end
 
   def check_for_keywords(input)
