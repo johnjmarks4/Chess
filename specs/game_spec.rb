@@ -92,14 +92,29 @@ describe Board do
       expect(board.checkmate?).to eql(false)
     end
 
+    before do
+      $stdin = StringIO.new("1a")
+    end
+
+    after do
+      $stdin = STDIN
+    end
+
     it "recognizes opportunity to castle" do
       board.board.each { |rows| rows.map! { |squares| squares = " " } }
+      board.board[1][0] = Pawn.new(0, 0, "w", board)
       board.board[0][0] = Rook.new(0, 0, "w", board)
+
       king = King.new(0, 4, "w", board)
       board.board[0][4] = king
       board.instance_variable_set("@turn", "w")
+      board.print_board
+      board.testing = true
 
-      expect(board.can_castle.length).to be > 1
+      expect(STDOUT).to receive(:puts).with("\nPlayer w, please select the piece you would like to move.").at_least(:once)
+      expect(STDOUT).to receive(:puts).with("Rook w can make the following moves:\n\n [\"1b\", \"1c\", \"1d\", \"castle\"]\n").once
+      expect(STDOUT).to receive(:puts).with("Please select your move, or type 'cancel' to select another piece.").once
+      board.move
     end
 
     it "recognizes en passant" do

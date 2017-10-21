@@ -1,7 +1,7 @@
 require 'yaml'
 
 class Board
-  attr_accessor :board, :checkers
+  attr_accessor :board, :checkers, :testing
 
   def initialize
     @turn = "w"
@@ -10,6 +10,7 @@ class Board
     set_board
     @w_king = @board[0][4]
     @b_king = @board[7][4]
+    @testing = false
   end
 
   def play
@@ -78,19 +79,22 @@ class Board
     begin
 
       puts "\nPlayer #{@turn}, please select the piece you would like to move."
-      piece = check_for_keywords(gets.chomp!)
+
+      piece = check_for_keywords($stdin.gets.chomp)
       return piece.call if piece.is_a?(Proc)
       piece = obj(piece)
       return error_messages(:color_error) if piece.color != @turn
+
       moves = piece.show_moves.map { |m| translate(m) }
       moves << "castle" if can_castle.include?([piece.r, piece.c])
       return error_messages(:no_moves_error) if moves.empty?
 
       puts "#{piece.class} #{piece.color} can make the following moves:\n\n #{moves}\n"
       puts "Please select your move, or type 'cancel' to select another piece."
-      move = check_for_keywords(gets.chomp!)
-      return [piece].each(&move) if move.is_a?(Proc)
 
+      return "quit" if @testing == true
+      move = check_for_keywords($stdin.gets.chomp)
+      return [piece].each(&move) if move.is_a?(Proc)
       return implement_move(piece, move)
 
     rescue => e 
@@ -163,7 +167,7 @@ class Board
 
     if castle.length > 1
       puts "Input the piece you would like to castle."
-      cp = translate(gets.chomp!)
+      cp = translate($stdin.gets.chomp)
       swap_piece = @board[cp.first][cp.last]
 
       if castle.include?(cp) && piece.class != swap_piece.class

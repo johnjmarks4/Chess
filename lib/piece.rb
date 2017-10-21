@@ -2,7 +2,6 @@ class Piece
   attr_accessor :r, :c, :type, :color, :unicode, :total_moves
 
   def initialize(row, column, color, board)
-    #@total_moves = 0 # put into pawn, queen, and castle classes?
     @r = row
     @c = column
     @color = color
